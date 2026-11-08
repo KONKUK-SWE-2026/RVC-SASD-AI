@@ -1,0 +1,1 @@
+/opt/homebrew/opt/gcc/bin/gcc-16 -dynamiclib -Wl,-headerpad_max_install_names -o librvc_controller.dylib -install_name @rpath/librvc_controller.dylib CMakeFiles/rvc_controller_shared.dir/src/rvc_controller.c.o

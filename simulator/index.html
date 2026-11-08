@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RVC System Test Simulator</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">System testing · C11 controller</p>
+      <h1>RVC Simulator</h1>
+    </div>
+    <div id="serverStatus" class="status-pill">Connecting to C controller…</div>
+  </header>
+
+  <main>
+    <section class="toolbar panel">
+      <label>Scenario
+        <select id="scenarioSelect"></select>
+      </label>
+      <label>Edit cell
+        <select id="editMode">
+          <option value="none">Inspect</option>
+          <option value="obstacle">Obstacle</option>
+          <option value="dust">Dust</option>
+          <option value="erase">Erase</option>
+          <option value="start">Set RVC start</option>
+        </select>
+      </label>
+      <label>Start direction
+        <select id="directionSelect">
+          <option value="N">North</option><option value="E">East</option>
+          <option value="S">South</option><option value="W">West</option>
+        </select>
+      </label>
+      <label>Tick limit (max 100)
+        <input id="tickLimit" type="number" min="1" max="100" value="8">
+      </label>
+      <button id="clearMap" class="secondary">Clear map</button>
+      <button id="saveScenario" class="secondary">Save map as scenario</button>
+    </section>
+
+    <section class="scenario-strip panel">
+      <div><span class="label">Test objective</span><strong id="scenarioName">Loading…</strong></div>
+      <div><span class="label">Requirements</span><span id="scenarioRequirements">—</span></div>
+      <div><span class="label">Expected behavior</span><span id="scenarioExpected">—</span></div>
+      <div><span class="label">Functions inspected</span><span id="scenarioFunctions">—</span></div>
+    </section>
+
+    <div class="workspace">
+      <section class="map-panel panel">
+        <div class="panel-heading">
+          <div><h2>10 × 10 floor map</h2><p>Click cells to edit. Grid coordinates are x=0–9, y=0–9.</p></div>
+          <div class="legend"><span><i class="legend-robot">↑</i> RVC</span><span><i class="legend-obstacle"></i> Obstacle</span><span><i class="legend-dust">✦</i> Dust</span></div>
+        </div>
+        <div id="grid" class="grid" role="grid" aria-label="Editable 10 by 10 RVC map"></div>
+        <div class="controls">
+          <button id="startButton" class="primary">Start</button>
+          <button id="pauseButton" class="secondary">Pause</button>
+          <button id="stepButton" class="secondary">Step</button>
+          <button id="backButton" class="secondary">◀ History</button>
+          <button id="forwardButton" class="secondary">History ▶</button>
+          <button id="resetButton" class="secondary">Reset</button>
+          <button id="restartButton" class="secondary">Restart scenario</button>
+          <button id="exportButton" class="secondary">Export trace</button>
+          <label class="speed">Playback <input id="speed" type="range" min="100" max="1200" step="100" value="500"><span id="speedLabel">500 ms</span></label>
+        </div>
+        <div class="tickline"><strong>Tick <span id="tickNumber">0</span></strong><span id="runStatus">Ready</span></div>
+      </section>
+
+      <aside class="inspector panel">
+        <div class="panel-heading"><div><h2>State inspector</h2><p>Selected history snapshot</p></div><span id="historyBadge" class="badge">Tick 0</span></div>
+        <div class="state-summary">
+          <div><span>Position</span><strong id="position">(4, 4)</strong></div>
+          <div><span>Direction</span><strong id="direction">N</strong></div>
+          <div><span>Controller state</span><strong id="controllerState">Forward</strong></div>
+          <div><span>C called this tick</span><strong id="cCalled">—</strong></div>
+        </div>
+        <h3>Sensor inputs</h3>
+        <pre id="sensorState">—</pre>
+        <h3>Motor output</h3>
+        <pre id="motorState">—</pre>
+        <h3>Cleaner output</h3>
+        <pre id="cleanerState">—</pre>
+        <h3>Controller variables</h3>
+        <pre id="internalState">—</pre>
+        <h3>Timers</h3>
+        <pre id="timerState">—</pre>
+        <h3>Transition and map changes</h3>
+        <pre id="transitionState">—</pre>
+      </aside>
+    </div>
+
+    <div class="lower-grid">
+      <section class="panel history-panel">
+        <div class="panel-heading"><div><h2>Execution history</h2><p>All snapshots are retained for this run.</p></div><span id="historyCount" class="badge">1 snapshot</span></div>
+        <div class="history-scroll"><table><thead><tr><th>Tick</th><th>Position</th><th>Heading</th><th>Controller</th><th>Sensors F/L/R/D</th><th>Motor</th><th>Cleaner</th><th>Decision</th></tr></thead><tbody id="historyRows"></tbody></table></div>
+      </section>
+      <section class="panel evaluation-panel">
+        <div class="panel-heading"><div><h2>Human evaluation</h2><p>The simulator records evidence; the evaluator assigns the verdict.</p></div></div>
+        <label>Result
+          <select id="evaluationResult"><option>INCONCLUSIVE</option><option>PASS</option><option>FAIL</option></select>
+        </label>
+        <label>Evaluator
+          <input id="evaluator" type="text" placeholder="Name">
+        </label>
+        <label>Observations
+          <textarea id="observations" rows="4" placeholder="Record expected vs observed behavior and tick numbers"></textarea>
+        </label>
+        <button id="saveEvaluation" class="primary">Save evaluation</button>
+        <div id="evaluationStatus" class="small-note">No verdict has been recorded for this run.</div>
+      </section>
+    </div>
+
+    <section class="panel notes-panel">
+      <h2>Simulator conventions and limits</h2>
+      <ul>
+        <li>The web app calls the compiled C11 controller. It does not implement the controller decisions in JavaScript.</li>
+        <li>One C call returns a movement sequence. The simulator advances that sequence one action per tick; it calls C again when the pending sequence is consumed.</li>
+        <li>The C command is “turn aside” without a side choice. For deterministic map motion only, the adapter prefers left when open, otherwise right; this is not a controller rule.</li>
+        <li>Boost duration, left/right selection criteria, sensor timing, and final cleaning state in the all-blocked case are unspecified in the requirements. Inspect these as INCONCLUSIVE where applicable.</li>
+        <li>A grid edge stops movement in the simulator. It is not reported as an obstacle sensor input.</li>
+      </ul>
+    </section>
+  </main>
+  <script src="/app.js" defer></script>
+</body>
+</html>

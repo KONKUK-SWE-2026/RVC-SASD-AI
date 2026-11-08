@@ -1,0 +1,5 @@
+if(EXISTS "/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests_e3b0c442_tests.cmake")
+  include("/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests_e3b0c442_tests.cmake")
+else()
+  add_test(rvc_controller_tests_NOT_BUILT rvc_controller_tests_NOT_BUILT)
+endif()

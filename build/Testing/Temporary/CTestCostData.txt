@@ -1,0 +1,11 @@
+RvcController.StartsInForwardStateAndMovesForwardWhenClear 2 0.00914865
+RvcController.ObstacleTurnsAsideThenContinuesForward 2 0.00595623
+RvcController.AllDirectionsBlockedMovesBackwardTurnsAndThenMovesForward 2 0.00544158
+RvcController.DustRequestsTemporaryCleaningPowerBoost 2 0.00523631
+RvcController.ObstacleAndDustOutputsRemainIndependent 2 0.00521935
+RvcController.StateFollowsEachObstacleCondition 2 0.00543798
+RvcController.ClassifiesEveryFrontLeftRightSensorCombination 2 0.00512721
+RvcController.AppliesEachObstacleConditionFromEveryCurrentState 2 0.00576665
+RvcController.RejectsNullStepArguments 2 0.00650354
+RvcController.NullInitializationIsSafe 2 0.0060524
+---

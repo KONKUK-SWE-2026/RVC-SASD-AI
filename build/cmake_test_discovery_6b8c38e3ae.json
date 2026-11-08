@@ -1,0 +1,62 @@
+{
+  "tests": 10,
+  "name": "AllTests",
+  "testsuites": [
+    {
+      "name": "RvcController",
+      "tests": 10,
+      "testsuite": [
+        {
+          "name": "StartsInForwardStateAndMovesForwardWhenClear",
+          "file": "\/Users\/jeonghogyun\/Documents\/dev\/konkuk\/assignment\/swe\/261030_RVC_SASD_Codex_real\/tests\/test_controller.cpp",
+          "line": 5
+        },
+        {
+          "name": "ObstacleTurnsAsideThenContinuesForward",
+          "file": "\/Users\/jeonghogyun\/Documents\/dev\/konkuk\/assignment\/swe\/261030_RVC_SASD_Codex_real\/tests\/test_controller.cpp",
+          "line": 21
+        },
+        {
+          "name": "AllDirectionsBlockedMovesBackwardTurnsAndThenMovesForward",
+          "file": "\/Users\/jeonghogyun\/Documents\/dev\/konkuk\/assignment\/swe\/261030_RVC_SASD_Codex_real\/tests\/test_controller.cpp",
+          "line": 37
+        },
+        {
+          "name": "DustRequestsTemporaryCleaningPowerBoost",
+          "file": "\/Users\/jeonghogyun\/Documents\/dev\/konkuk\/assignment\/swe\/261030_RVC_SASD_Codex_real\/tests\/test_controller.cpp",
+          "line": 54
+        },
+        {
+          "name": "ObstacleAndDustOutputsRemainIndependent",
+          "file": "\/Users\/jeonghogyun\/Documents\/dev\/konkuk\/assignment\/swe\/261030_RVC_SASD_Codex_real\/tests\/test_controller.cpp",
+          "line": 67
+        },
+        {
+          "name": "StateFollowsEachObstacleCondition",
+          "file": "\/Users\/jeonghogyun\/Documents\/dev\/konkuk\/assignment\/swe\/261030_RVC_SASD_Codex_real\/tests\/test_controller.cpp",
+          "line": 80
+        },
+        {
+          "name": "ClassifiesEveryFrontLeftRightSensorCombination",
+          "file": "\/Users\/jeonghogyun\/Documents\/dev\/konkuk\/assignment\/swe\/261030_RVC_SASD_Codex_real\/tests\/test_controller.cpp",
+          "line": 99
+        },
+        {
+          "name": "AppliesEachObstacleConditionFromEveryCurrentState",
+          "file": "\/Users\/jeonghogyun\/Documents\/dev\/konkuk\/assignment\/swe\/261030_RVC_SASD_Codex_real\/tests\/test_controller.cpp",
+          "line": 126
+        },
+        {
+          "name": "RejectsNullStepArguments",
+          "file": "\/Users\/jeonghogyun\/Documents\/dev\/konkuk\/assignment\/swe\/261030_RVC_SASD_Codex_real\/tests\/test_controller.cpp",
+          "line": 151
+        },
+        {
+          "name": "NullInitializationIsSafe",
+          "file": "\/Users\/jeonghogyun\/Documents\/dev\/konkuk\/assignment\/swe\/261030_RVC_SASD_Codex_real\/tests\/test_controller.cpp",
+          "line": 163
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+/usr/bin/ar qc librvc_gtest.a "CMakeFiles/rvc_gtest.dir/opt/homebrew/Cellar/googletest/1.18.0/include/googletest/googletest/src/gtest-all.cc.o"
+/usr/bin/ranlib librvc_gtest.a

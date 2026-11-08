@@ -1,0 +1,1 @@
+/opt/homebrew/opt/gcc/bin/g++-16 -Wl,-search_paths_first -Wl,-headerpad_max_install_names --coverage CMakeFiles/rvc_controller_tests.dir/tests/test_controller.cpp.o -o rvc_controller_tests  librvc_controller.a librvc_gtest_main.a librvc_gtest.a

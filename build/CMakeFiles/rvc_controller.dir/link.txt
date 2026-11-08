@@ -1,0 +1,2 @@
+/usr/bin/ar qc librvc_controller.a CMakeFiles/rvc_controller.dir/src/rvc_controller.c.o
+/usr/bin/ranlib librvc_controller.a

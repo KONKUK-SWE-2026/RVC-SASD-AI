@@ -1,0 +1,217 @@
+        -:    0:Source:/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/src/rvc_controller.c
+        -:    0:Graph:build/CMakeFiles/rvc_controller.dir/src/rvc_controller.c.gcno
+        -:    0:Data:build/CMakeFiles/rvc_controller.dir/src/rvc_controller.c.gcda
+        -:    0:Runs:47
+        -:    1:#include "rvc_controller.h"
+        -:    2:
+        -:    3:typedef enum {
+        -:    4:    OBSTACLE_CLEAR,
+        -:    5:    OBSTACLE_DETECTED,
+        -:    6:    OBSTACLE_ALL_DIRECTIONS
+        -:    7:} ObstacleCondition;
+        -:    8:
+        -:    9:typedef struct {
+        -:   10:    RvcMovementAction actions[RVC_MAX_MOVEMENT_COMMANDS];
+        -:   11:    size_t count;
+        -:   12:} MovementSequence;
+        -:   13:
+function classify_obstacle_condition called 75 returned 100% blocks executed 100%
+       75:   14:static ObstacleCondition classify_obstacle_condition(const RvcSensorInput *input)
+        -:   15:{
+       75:   16:    if (input->front_obstacle && input->left_obstacle && input->right_obstacle) {
+branch  0 taken 45 (fallthrough)
+branch  1 taken 30
+branch  2 taken 21 (fallthrough)
+branch  3 taken 24
+branch  4 taken 18 (fallthrough)
+branch  5 taken 3
+       18:   17:        return OBSTACLE_ALL_DIRECTIONS;
+        -:   18:    }
+       57:   19:    if (input->front_obstacle || input->left_obstacle || input->right_obstacle) {
+branch  0 taken 30 (fallthrough)
+branch  1 taken 27
+branch  2 taken 21 (fallthrough)
+branch  3 taken 9
+branch  4 taken 3 (fallthrough)
+branch  5 taken 18
+       39:   20:        return OBSTACLE_DETECTED;
+        -:   21:    }
+       18:   22:    return OBSTACLE_CLEAR;
+        -:   23:}
+        -:   24:
+function select_movement_sequence called 75 returned 100% blocks executed 100%
+       75:   25:static MovementSequence select_movement_sequence(ObstacleCondition condition)
+        -:   26:{
+       75:   27:    MovementSequence sequence = {{RVC_MOVE_FORWARD}, 1};
+        -:   28:
+       75:   29:    if (condition == OBSTACLE_DETECTED) {
+branch  0 taken 39 (fallthrough)
+branch  1 taken 36
+       39:   30:        sequence.actions[0] = RVC_MOVE_TURN_ASIDE;
+       39:   31:        sequence.actions[1] = RVC_MOVE_FORWARD;
+       39:   32:        sequence.count = 2;
+       36:   33:    } else if (condition == OBSTACLE_ALL_DIRECTIONS) {
+branch  0 taken 18 (fallthrough)
+branch  1 taken 18
+       18:   34:        sequence.actions[0] = RVC_MOVE_BACKWARD;
+       18:   35:        sequence.actions[1] = RVC_MOVE_TURN_ASIDE;
+       18:   36:        sequence.actions[2] = RVC_MOVE_FORWARD;
+       18:   37:        sequence.count = 3;
+        -:   38:    }
+        -:   39:
+       75:   40:    return sequence;
+        -:   41:}
+        -:   42:
+function produce_movement_command called 75 returned 100% blocks executed 100%
+       75:   43:static void produce_movement_command(const MovementSequence *sequence,
+        -:   44:                                     RvcControllerOutput *output)
+        -:   45:{
+       75:   46:    output->movement_count = sequence->count;
+      225:   47:    for (size_t i = 0; i < sequence->count; ++i) {
+branch  0 taken 150
+branch  1 taken 75 (fallthrough)
+      150:   48:        output->movement[i] = sequence->actions[i];
+        -:   49:    }
+       75:   50:}
+        -:   51:
+function determine_obstacle_cleaning_action called 75 returned 100% blocks executed 100%
+       75:   52:static RvcCleaningAction determine_obstacle_cleaning_action(ObstacleCondition condition)
+        -:   53:{
+       75:   54:    if (condition == OBSTACLE_DETECTED) {
+branch  0 taken 39 (fallthrough)
+branch  1 taken 36
+       39:   55:        return RVC_CLEANING_STOP_THEN_CLEAN_AND_MOP;
+        -:   56:    }
+       36:   57:    if (condition == OBSTACLE_ALL_DIRECTIONS) {
+branch  0 taken 18 (fallthrough)
+branch  1 taken 18
+       18:   58:        return RVC_CLEANING_STOP_THEN_CLEAN_AND_MOP;
+        -:   59:    }
+       18:   60:    return RVC_CLEANING_AND_MOP;
+        -:   61:}
+        -:   62:
+function determine_movement_response called 75 returned 100% blocks executed 100%
+       75:   63:static ObstacleCondition determine_movement_response(const RvcSensorInput *input,
+        -:   64:                                                      RvcControllerOutput *output)
+        -:   65:{
+       75:   66:    const ObstacleCondition condition = classify_obstacle_condition(input);
+call    0 returned 75
+       75:   67:    const MovementSequence sequence = select_movement_sequence(condition);
+call    0 returned 75
+       75:   68:    produce_movement_command(&sequence, output);
+call    0 returned 75
+       75:   69:    return condition;
+        -:   70:}
+        -:   71:
+function control_cleaning_behavior called 75 returned 100% blocks executed 100%
+       75:   72:static void control_cleaning_behavior(ObstacleCondition condition,
+        -:   73:                                      RvcControllerOutput *output)
+        -:   74:{
+       75:   75:    output->cleaning_action = determine_obstacle_cleaning_action(condition);
+call    0 returned 75
+       75:   76:}
+        -:   77:
+function update_dust_boost_timer called 75 returned 100% blocks executed 100%
+       75:   78:static void update_dust_boost_timer(RvcController *controller, bool dust_detected)
+        -:   79:{
+       75:   80:    if (dust_detected) {
+branch  0 taken 21 (fallthrough)
+branch  1 taken 54
+       21:   81:        controller->boost_ticks_remaining = RVC_DUST_BOOST_DURATION_TICKS;
+       54:   82:    } else if (controller->boost_ticks_remaining > 0U) {
+branch  0 taken 51 (fallthrough)
+branch  1 taken 3
+       51:   83:        --controller->boost_ticks_remaining;
+        -:   84:    }
+       75:   85:}
+        -:   86:
+function determine_active_power_mode called 150 returned 100% blocks executed 100%
+      150:   87:static RvcCleaningPowerMode determine_active_power_mode(const RvcController *controller,
+        -:   88:                                                        bool cleaning_active)
+        -:   89:{
+       69:   90:    return cleaning_active && controller->boost_ticks_remaining > 0U
+        -:   91:               ? RVC_POWER_BOOST
+      150:   92:               : RVC_POWER_NORMAL;
+branch  0 taken 69 (fallthrough)
+branch  1 taken 81
+branch  2 taken 42 (fallthrough)
+branch  3 taken 27
+        -:   93:}
+        -:   94:
+function rvc_controller_init called 63 returned 100% blocks executed 100%
+       63:   95:void rvc_controller_init(RvcController *controller)
+        -:   96:{
+       63:   97:    if (controller != NULL) {
+branch  0 taken 60 (fallthrough)
+branch  1 taken 3
+       60:   98:        controller->state = RVC_STATE_FORWARD;
+       60:   99:        controller->boost_ticks_remaining = 0U;
+        -:  100:    }
+       63:  101:}
+        -:  102:
+function rvc_controller_step called 84 returned 100% blocks executed 100%
+       84:  103:bool rvc_controller_step(RvcController *controller,
+        -:  104:                         const RvcSensorInput *input,
+        -:  105:                         RvcControllerOutput *output)
+        -:  106:{
+       84:  107:    if (controller == NULL || input == NULL || output == NULL) {
+branch  0 taken 81 (fallthrough)
+branch  1 taken 3
+branch  2 taken 78 (fallthrough)
+branch  3 taken 3
+branch  4 taken 3 (fallthrough)
+branch  5 taken 75
+        9:  108:        return false;
+        -:  109:    }
+        -:  110:
+       75:  111:    RvcControllerOutput result = {0};
+       75:  112:    const ObstacleCondition condition = determine_movement_response(input, &result);
+call    0 returned 75
+       75:  113:    control_cleaning_behavior(condition, &result);
+call    0 returned 75
+       75:  114:    result.cleaning_power_mode = determine_active_power_mode(
+call    0 returned 75
+        -:  115:        controller, condition == OBSTACLE_CLEAR);
+       75:  116:    result.boost_ticks_remaining = controller->boost_ticks_remaining;
+        -:  117:
+       75:  118:    if (condition == OBSTACLE_CLEAR) {
+branch  0 taken 18 (fallthrough)
+branch  1 taken 57
+       18:  119:        controller->state = RVC_STATE_FORWARD;
+       57:  120:    } else if (condition == OBSTACLE_DETECTED) {
+branch  0 taken 39 (fallthrough)
+branch  1 taken 18
+       39:  121:        controller->state = RVC_STATE_OBSTACLE_AVOIDANCE;
+        -:  122:    } else {
+       18:  123:        controller->state = RVC_STATE_ALL_DIRECTIONS_BLOCKED;
+        -:  124:    }
+        -:  125:
+       75:  126:    *output = result;
+       75:  127:    return true;
+        -:  128:}
+        -:  129:
+function rvc_controller_advance_tick called 81 returned 100% blocks executed 100%
+       81:  130:bool rvc_controller_advance_tick(RvcController *controller,
+        -:  131:                                 bool dust_detected,
+        -:  132:                                 bool cleaning_active,
+        -:  133:                                 RvcCleaningPowerState *power_state)
+        -:  134:{
+       81:  135:    if (controller == NULL || power_state == NULL) {
+branch  0 taken 78 (fallthrough)
+branch  1 taken 3
+branch  2 taken 3 (fallthrough)
+branch  3 taken 75
+        6:  136:        return false;
+        -:  137:    }
+        -:  138:
+       75:  139:    update_dust_boost_timer(controller, dust_detected);
+call    0 returned 75
+        -:  140:
+       75:  141:    const RvcCleaningPowerState result = {
+       75:  142:        determine_active_power_mode(controller, cleaning_active),
+call    0 returned 75
+       75:  143:        controller->boost_ticks_remaining
+        -:  144:    };
+       75:  145:    *power_state = result;
+       75:  146:    return true;
+        -:  147:}

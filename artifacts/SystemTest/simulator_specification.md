@@ -1,28 +1,25 @@
-# Web-Based RVC Simulator Specification
+# Web-Based RVC Simulator Specification — Dust Boost State
 
 ## Execution architecture
 
-The HTML/CSS/JavaScript UI communicates with `simulator/server.py` over a local HTTP API. The Python adapter loads `build/librvc_controller.dylib` with `ctypes` and calls the implemented C11 `rvc_controller_init` and `rvc_controller_step` functions. The UI does not implement controller decisions.
+The HTML/CSS/JavaScript UI communicates with `simulator/server.py` over a local HTTP API. Python `ctypes` loads `build/librvc_controller.dylib`; the C11 controller performs movement decisions and maintains the boost countdown. JavaScript contains no controller decision logic.
 
-## Map and controls
+## Tick and C interface mapping
 
-- 10x10 grid, `(x,y)` coordinates `0..9`, initial default `(4,4)` facing north.
-- Empty, obstacle, dust, and RVC display; obstacles and dust may overlap.
-- Edit obstacle, dust, initial RVC position, or erase; choose initial direction; clear and save custom maps.
-- Start, pause, single step, inspect previous/next snapshots, reset, restart, change playback delay, export trace.
-- Each scenario accepts 1–100 ticks; predefined scenarios use a maximum of 8.
-- A turn-side adapter convention is documented in the UI and trace; the C command remains `TURN_ASIDE`.
+A simulation tick is one call to the server's `/api/tick`. On every tick the adapter derives the current dust sensor value and calls C `rvc_controller_advance_tick`, even when a movement sequence still has queued actions. If no movement action is queued, the adapter also calls `rvc_controller_step` to select a fresh movement sequence. It executes one queued action and records the combined cleaner action and current power mode.
 
-## Deterministic tick adapter
+Each dust-positive tick initializes or refreshes the five-tick interval. The interval decrements on every later simulation tick, including movement-sequence continuation ticks and ticks while cleaning is stopped. Effective output is `BOOST` only when the current action is cleaning and the interval remains positive; stopped-cleaning actions report `NORMAL`. RVC-04 recovery stops cleaning during backward/turn actions and resumes during forward movement. Power magnitude remains abstract.
 
-At a decision tick the adapter derives front/left/right obstacle and current-cell dust inputs from the map and heading, then calls the C controller once. It records the returned state and output and executes one abstract movement action. A multi-action movement sequence is continued on later ticks without another C invocation until that sequence is consumed. This is the simulator's adapter mapping, since the C interface returns a sequence rather than defining hardware timing or action-completion events.
+## Map, controls, and inspection
 
-Each history snapshot records tick, position, heading, controller state, current sensor readings, inputs sampled by C on that tick (when invoked), C movement and cleaner outputs, executed motor action, boost request, remaining sequence, map changes, timers as unavailable/TBD, transitions, and explanatory notes. Tick 0 records initialization before the first C call.
+- 10x10 map, coordinates 0..9, default start `(4,4)` facing north.
+- Obstacles, dust, RVC location and heading; editable obstacles, dust, start position, and heading.
+- Start, pause, single step, history navigation, reset, restart, playback speed, custom-map save, and trace export.
+- Scenario limit is configurable from 1 to 100 ticks.
+- Every snapshot includes position, heading, obstacle/dust sensors, movement decision status, C-selected sequence, current cleaner action, power mode, remaining boost ticks, movement sequence progress, map changes, controller state, and transition notes. Timers not implemented in C remain marked TBD.
 
-## Test oracle and limitations
+The turn-side selection remains a deterministic adapter convention (left when open, otherwise right); it is not C controller policy.
 
-Scenarios provide expected behavior and requirement references. The simulator records observations and execution history but never assigns PASS/FAIL automatically; a human evaluator records PASS, FAIL, or INCONCLUSIVE with notes. The requirements do not specify sampling cadence, turn direction, boost level/duration, or final cleaning state in the all-blocked case. Hardware drivers are outside scope. No fabricated values are shown for unavailable timers.
+## System testing and limits
 
-## Validation evidence
-
-The simulator API is exercised by `simulator/run_system_tests.py`; every predefined scenario reloads the C controller, verifies the 10x10 grid, advances with contiguous ticks, checks valid state/position and C output presence, and preserves the full trace. Boundary checks also cover custom start/map configuration, reset restoration, the exact 100-tick stop, no further tick after the limit, and rejection of an obstacle under the initial RVC. These checks validate the adapter and trace integrity, not requirement conformance.
+The 21 scenarios are requirement-traceable and use the actual compiled C implementation. Execution history is saved in `artifacts/SystemTest/execution_traces.json`. The test oracle remains human; no scenario receives automatic PASS or FAIL. Automated checks validate simulator integration, history, C cleaning-action/power-mode consistency, and tick limits, not scenario verdicts. Hardware drivers and numeric power levels remain outside scope. The turn-side rule remains unspecified.

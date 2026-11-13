@@ -55,14 +55,9 @@ static RvcCleaningAction determine_obstacle_cleaning_action(ObstacleCondition co
         return RVC_CLEANING_STOP_THEN_CLEAN_AND_MOP;
     }
     if (condition == OBSTACLE_ALL_DIRECTIONS) {
-        return RVC_CLEANING_STOP_THEN_UNSPECIFIED;
+        return RVC_CLEANING_STOP_THEN_CLEAN_AND_MOP;
     }
     return RVC_CLEANING_AND_MOP;
-}
-
-static bool determine_dust_power_adjustment(const RvcSensorInput *input)
-{
-    return input->dust_detected;
 }
 
 static ObstacleCondition determine_movement_response(const RvcSensorInput *input,
@@ -75,17 +70,33 @@ static ObstacleCondition determine_movement_response(const RvcSensorInput *input
 }
 
 static void control_cleaning_behavior(ObstacleCondition condition,
-                                      const RvcSensorInput *input,
                                       RvcControllerOutput *output)
 {
     output->cleaning_action = determine_obstacle_cleaning_action(condition);
-    output->request_temporary_power_boost = determine_dust_power_adjustment(input);
+}
+
+static void update_dust_boost_timer(RvcController *controller, bool dust_detected)
+{
+    if (dust_detected) {
+        controller->boost_ticks_remaining = RVC_DUST_BOOST_DURATION_TICKS;
+    } else if (controller->boost_ticks_remaining > 0U) {
+        --controller->boost_ticks_remaining;
+    }
+}
+
+static RvcCleaningPowerMode determine_active_power_mode(const RvcController *controller,
+                                                        bool cleaning_active)
+{
+    return cleaning_active && controller->boost_ticks_remaining > 0U
+               ? RVC_POWER_BOOST
+               : RVC_POWER_NORMAL;
 }
 
 void rvc_controller_init(RvcController *controller)
 {
     if (controller != NULL) {
         controller->state = RVC_STATE_FORWARD;
+        controller->boost_ticks_remaining = 0U;
     }
 }
 
@@ -99,7 +110,10 @@ bool rvc_controller_step(RvcController *controller,
 
     RvcControllerOutput result = {0};
     const ObstacleCondition condition = determine_movement_response(input, &result);
-    control_cleaning_behavior(condition, input, &result);
+    control_cleaning_behavior(condition, &result);
+    result.cleaning_power_mode = determine_active_power_mode(
+        controller, condition == OBSTACLE_CLEAR);
+    result.boost_ticks_remaining = controller->boost_ticks_remaining;
 
     if (condition == OBSTACLE_CLEAR) {
         controller->state = RVC_STATE_FORWARD;
@@ -110,5 +124,24 @@ bool rvc_controller_step(RvcController *controller,
     }
 
     *output = result;
+    return true;
+}
+
+bool rvc_controller_advance_tick(RvcController *controller,
+                                 bool dust_detected,
+                                 bool cleaning_active,
+                                 RvcCleaningPowerState *power_state)
+{
+    if (controller == NULL || power_state == NULL) {
+        return false;
+    }
+
+    update_dust_boost_timer(controller, dust_detected);
+
+    const RvcCleaningPowerState result = {
+        determine_active_power_mode(controller, cleaning_active),
+        controller->boost_ticks_remaining
+    };
+    *power_state = result;
     return true;
 }

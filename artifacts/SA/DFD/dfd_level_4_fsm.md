@@ -1,57 +1,41 @@
-# DFD Level 4 — Controller FSM
+# DFD Level 4 — Controller FSMs
 
-## Controller Mapping
+This level contains the Movement FSM and the five-tick Dust Boost Interval FSM. The timer advances once on every simulation tick, independently of movement-sequence progress and cleaning activity. Effective power output is gated by the current cleaning action: stopped cleaning always emits Normal, even while the interval remains active.
 
-This FSM represents Process 1.2.1 — Select Movement Sequence from DFD Level 3. Its input is `Obstacle Response Condition` and its output is `Selected Movement Sequence`. Cleaning control, including dust power adjustment, remains in Processes 2.1–2.3 and is not included in this movement controller FSM.
-
-The states represent the movement sequence selected for the current obstacle condition, not confirmed physical movement progress. The requirements do not define movement completion feedback, sensor sampling timing, or the left/right turn selection rule.
-
-## FSM
+## Movement Controller FSM
 
 ```mermaid
 stateDiagram-v2
     [*] --> Forward : Initialize / Selected Movement Sequence = Forward
-
-    Forward --> Forward : Obstacle Response Condition [No obstacle] / Selected Movement Sequence = Forward
-    Forward --> ObstacleAvoidance : Obstacle Response Condition [Obstacle detected, not all three directions] / Selected Movement Sequence = Turn aside, then forward
-    Forward --> AllDirectionsBlocked : Obstacle Response Condition [Obstacles in front, left, and right] / Selected Movement Sequence = Backward, turn aside, then forward
-
-    ObstacleAvoidance --> Forward : Obstacle Response Condition [No obstacle] / Selected Movement Sequence = Forward
-    ObstacleAvoidance --> ObstacleAvoidance : Obstacle Response Condition [Obstacle detected, not all three directions] / Selected Movement Sequence = Turn aside, then forward
-    ObstacleAvoidance --> AllDirectionsBlocked : Obstacle Response Condition [Obstacles in front, left, and right] / Selected Movement Sequence = Backward, turn aside, then forward
-
-    AllDirectionsBlocked --> Forward : Obstacle Response Condition [No obstacle] / Selected Movement Sequence = Forward
-    AllDirectionsBlocked --> ObstacleAvoidance : Obstacle Response Condition [Obstacle detected, not all three directions] / Selected Movement Sequence = Turn aside, then forward
-    AllDirectionsBlocked --> AllDirectionsBlocked : Obstacle Response Condition [Obstacles in front, left, and right] / Selected Movement Sequence = Backward, turn aside, then forward
+    Forward --> Forward : No obstacle / Forward
+    Forward --> ObstacleAvoidance : Partial obstacle / Turn aside, then forward
+    Forward --> AllDirectionsBlocked : Front, left, right blocked / Backward, turn aside, then forward
+    ObstacleAvoidance --> Forward : No obstacle / Forward
+    ObstacleAvoidance --> ObstacleAvoidance : Partial obstacle / Turn aside, then forward
+    ObstacleAvoidance --> AllDirectionsBlocked : Front, left, right blocked / Backward, turn aside, then forward
+    AllDirectionsBlocked --> Forward : No obstacle / Forward
+    AllDirectionsBlocked --> ObstacleAvoidance : Partial obstacle / Turn aside, then forward
+    AllDirectionsBlocked --> AllDirectionsBlocked : Front, left, right blocked / Backward, turn aside, then forward
 ```
 
-## Transition Table
+States represent the response selected for the current obstacle detections, not confirmed physical movement completion. The requirements still leave the left/right selection rule unspecified.
 
-| Current State | Event | Condition | Action | Next State |
-|---|---|---|---|---|
-| `[*]` | Initialize | Controller enters its initial state | Select forward movement sequence | Forward |
-| Forward | Obstacle Response Condition | No obstacle | Selected Movement Sequence = Forward | Forward |
-| Forward | Obstacle Response Condition | Obstacle detected, not all three directions | Selected Movement Sequence = Turn aside left or right, then forward | ObstacleAvoidance |
-| Forward | Obstacle Response Condition | Obstacles in front, left, and right | Selected Movement Sequence = Backward, turn aside left or right, then forward | AllDirectionsBlocked |
-| ObstacleAvoidance | Obstacle Response Condition | No obstacle | Selected Movement Sequence = Forward | Forward |
-| ObstacleAvoidance | Obstacle Response Condition | Obstacle detected, not all three directions | Selected Movement Sequence = Turn aside left or right, then forward | ObstacleAvoidance |
-| ObstacleAvoidance | Obstacle Response Condition | Obstacles in front, left, and right | Selected Movement Sequence = Backward, turn aside left or right, then forward | AllDirectionsBlocked |
-| AllDirectionsBlocked | Obstacle Response Condition | No obstacle | Selected Movement Sequence = Forward | Forward |
-| AllDirectionsBlocked | Obstacle Response Condition | Obstacle detected, not all three directions | Selected Movement Sequence = Turn aside left or right, then forward | ObstacleAvoidance |
-| AllDirectionsBlocked | Obstacle Response Condition | Obstacles in front, left, and right | Selected Movement Sequence = Backward, turn aside left or right, then forward | AllDirectionsBlocked |
+## Dust Boost Interval FSM and Effective Power Output
 
-## Validation and Unspecified Behavior
+```mermaid
+stateDiagram-v2
+    [*] --> Normal : Initialize / remaining = 0, power mode = Normal
+    Normal --> Boost : Simulation Tick [dust detected] / remaining = 5
+    Normal --> Normal : Simulation Tick [no dust] / remaining = 0
+    Boost --> Boost : Simulation Tick [dust detected] / refresh remaining = 5
+    Boost --> Boost : Simulation Tick [no dust and remaining > 1] / decrement remaining by 1
+    Boost --> Normal : Simulation Tick [no dust and remaining = 1] / remaining = 0
+```
 
-- Each condition is mutually exclusive: no obstacle, obstacle detected but not in all three directions, or obstacles in all three specified directions.
-- Every state has a transition for each condition, so no transition priority is needed and no state is unreachable.
-- Left/right turn selection is unspecified by the preliminary requirements; the FSM preserves both alternatives.
-- The FSM selects abstract movement sequences. It does not model actuator completion or timing because those inputs are not specified in DFD Level 3 or the preliminary requirements.
-- The system's cleaning behavior and dust boost are handled by the separate cleaning processes, so simultaneous obstacle/dust priority is not defined by this FSM.
-- The initial arrow initializes the FSM to the required forward movement selection; it does not define an external start event or a cleaning command.
+The dust-positive tick starts a five-tick interval. A subsequent dust-positive tick resets the interval to five. The effective output is Boost only when cleaning is active and the interval has time remaining; during stopped-cleaning actions it is Normal. After five interval ticks without refresh, the timer expires. Numeric actuator power levels remain unspecified and outside the hardware-control scope.
 
 ## Requirement Traceability
 
-- Preliminary requirement 2: forward movement while cleaning.
-- Preliminary requirement 3: turn aside left or right and continue forward when an obstacle is detected.
-- Preliminary requirement 4: move backward, turn aside left or right, and then forward when the front, left, and right are blocked.
-- DFD Level 3 Process 1.2.1: maps `Obstacle Response Condition` to `Selected Movement Sequence`.
+- RVC-02–RVC-04: Movement Controller FSM and Process 1.2.1.
+- RVC-05: Dust Boost Interval FSM, Processes 2.2.1–2.2.2, and D1 Dust Boost Timer State; effective output is gated by cleaning activity.
+- RVC-05 timer expiry is deterministic: a dust-positive tick initializes/refreshes to five; each later dust-negative simulation tick decrements once; zero selects Normal.

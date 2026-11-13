@@ -1,6 +1,6 @@
 # DFD Level 2
 
-This level decomposes Level 1 Processes 1 and 2 into detailed obstacle and cleaning functions. Separate diagrams are used for each parent process. Each diagram preserves its parent's inputs and outputs.
+This level decomposes Level 1 Processes 1 and 2. Separate diagrams preserve each parent's external interface. Process 2.2 now maintains the persistent five-tick dust boost state using an internal timer store and temporal tick event.
 
 ## Decomposition of Process 1 — Determine Movement Response
 
@@ -18,7 +18,7 @@ flowchart LR
 
 | Parent Process | Child Process | Responsibility |
 |---|---|---|
-| 1: Determine Movement Response | 1.1: Classify Obstacle Condition | Distinguish no obstacle, an obstacle response, and obstacles detected in all three specified directions. |
+| 1: Determine Movement Response | 1.1: Classify Obstacle Condition | Distinguish no obstacle, a partial obstacle condition, and all three specified directions blocked. |
 | 1: Determine Movement Response | 1.2: Issue Movement Command | Direct forward, turn-aside, and backward movement according to the classified condition. |
 
 ### Balancing with Process 1
@@ -33,31 +33,43 @@ flowchart LR
 ```mermaid
 flowchart LR
     Sensors["Sensors"]
+    Clock(("Internal Simulation Tick"))
     P21(("2.1: Determine Obstacle Cleaning Action"))
-    P22(("2.2: Determine Dust Power Adjustment"))
+    P22(("2.2: Maintain Dust Boost State"))
     P23(("2.3: Generate Cleaning Control Command"))
+    D1[("D1: Dust Boost Timer State")]
     Hardware["Drive and Cleaning Hardware"]
 
     Sensors -->|Obstacle Detection Input| P21
     Sensors -->|Dust Detection Input| P22
+    P21 -->|Cleaning Active Indicator| P22
+    Clock -.->|Simulation Tick| P22
+    D1 -->|Previous remaining boost ticks| P22
+    P22 -->|Updated remaining boost ticks| D1
     P21 -->|Obstacle-Related Cleaning Action| P23
-    P22 -->|Dust Power Adjustment| P23
+    P22 -->|Boost Availability| P23
     P23 -->|Cleaning Control Command| Hardware
 ```
 
 | Parent Process | Child Process | Responsibility |
 |---|---|---|
-| 2: Control Cleaning Behavior | 2.1: Determine Obstacle Cleaning Action | Determine cleaning stop/resume actions stated for obstacle handling. |
-| 2: Control Cleaning Behavior | 2.2: Determine Dust Power Adjustment | Request a temporary cleaning power increase when dust is detected. |
-| 2: Control Cleaning Behavior | 2.3: Generate Cleaning Control Command | Produce the cleaning/mopping command using the baseline behavior and the obstacle-related and dust-related actions. |
+| 2: Control Cleaning Behavior | 2.1: Determine Obstacle Cleaning Action | Determine whether the current movement action stops or resumes cleaning. |
+| 2: Control Cleaning Behavior | 2.2: Maintain Dust Boost State | Start or refresh a five-tick interval on dust detection; advance it on each simulation tick; report remaining boost availability. |
+| 2: Control Cleaning Behavior | 2.3: Generate Cleaning Control Command | Combine cleaning activity with boost availability; report Boost only while cleaning is active. |
 
 ### Balancing with Process 2
 
-| Process 2 Interface | Level 2 Flow(s) | Direction |
+| Process 2 Interface / State | Level 2 Flow(s) | Direction |
 |---|---|---|
-| Obstacle Detection Input | Obstacle Detection Input to Process 2.1 | Sensors → child process |
-| Dust Detection Input | Dust Detection Input to Process 2.2 | Sensors → child process |
-| Cleaning Control Command | Cleaning Control Command from Process 2.3 | Child process → Drive and Cleaning Hardware |
+| Obstacle Detection Input | Input to Process 2.1 | Sensors → child process |
+| Dust Detection Input | Input to Process 2.2 | Sensors → child process |
+| Cleaning Active Indicator | Output from Process 2.1 to Process 2.2 | Process 2.1 → Process 2.2 |
+| Cleaning Control Command | Output from Process 2.3, with power mode | Child process → Drive and Cleaning Hardware |
+| Internal boost state | D1 read/write within Process 2 | Process 2.2 ↔ D1 |
+| Simulation Tick | Internal temporal trigger to Process 2.2 | Internal clock → child process |
 
-The Level 2 external inputs and outputs match the interfaces of Processes 1 and 2 at Level 1. No data stores or separate control flows are introduced because the requirements do not specify them.
+## Data Store
 
+`D1` contains the remaining boost-interval ticks, in the range 0–5. Dust detected on a tick sets it to 5; another dust-positive tick refreshes it to 5. Without dust, it decreases once on every simulation tick, including while cleaning is stopped. Process 2.3 emits Boost only when D1 is positive and the current action is cleaning; otherwise it emits Normal.
+
+The Level 1 external inputs and outputs remain unchanged; timer state is an internal detail of Process 2.

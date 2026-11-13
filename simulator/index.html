@@ -76,7 +76,7 @@
           <div><span>Position</span><strong id="position">(4, 4)</strong></div>
           <div><span>Direction</span><strong id="direction">N</strong></div>
           <div><span>Controller state</span><strong id="controllerState">Forward</strong></div>
-          <div><span>C called this tick</span><strong id="cCalled">—</strong></div>
+          <div><span>Boost timer / decision</span><strong id="cCalled">—</strong></div>
         </div>
         <h3>Sensor inputs</h3>
         <pre id="sensorState">—</pre>
@@ -96,7 +96,7 @@
     <div class="lower-grid">
       <section class="panel history-panel">
         <div class="panel-heading"><div><h2>Execution history</h2><p>All snapshots are retained for this run.</p></div><span id="historyCount" class="badge">1 snapshot</span></div>
-        <div class="history-scroll"><table><thead><tr><th>Tick</th><th>Position</th><th>Heading</th><th>Controller</th><th>Sensors F/L/R/D</th><th>Motor</th><th>Cleaner</th><th>Decision</th></tr></thead><tbody id="historyRows"></tbody></table></div>
+        <div class="history-scroll"><table><thead><tr><th>Tick</th><th>Position</th><th>Heading</th><th>Controller</th><th>Sensors F/L/R/D</th><th>Motor</th><th>Cleaner / power</th><th>Decision</th></tr></thead><tbody id="historyRows"></tbody></table></div>
       </section>
       <section class="panel evaluation-panel">
         <div class="panel-heading"><div><h2>Human evaluation</h2><p>The simulator records evidence; the evaluator assigns the verdict.</p></div></div>
@@ -120,7 +120,8 @@
         <li>The web app calls the compiled C11 controller. It does not implement the controller decisions in JavaScript.</li>
         <li>One C call returns a movement sequence. The simulator advances that sequence one action per tick; it calls C again when the pending sequence is consumed.</li>
         <li>The C command is “turn aside” without a side choice. For deterministic map motion only, the adapter prefers left when open, otherwise right; this is not a controller rule.</li>
-        <li>Boost duration, left/right selection criteria, sensor timing, and final cleaning state in the all-blocked case are unspecified in the requirements. Inspect these as INCONCLUSIVE where applicable.</li>
+        <li>The compiled C controller advances the five-tick dust timer on every simulation tick. Effective Boost is shown only while cleaning is active; the timer continues during stopped-cleaning movement actions.</li>
+        <li>Boost power magnitude and left/right turn selection remain abstract.</li>
         <li>A grid edge stops movement in the simulator. It is not reported as an obstacle sensor input.</li>
       </ul>
     </section>

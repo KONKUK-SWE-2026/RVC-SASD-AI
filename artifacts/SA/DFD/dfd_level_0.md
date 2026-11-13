@@ -1,6 +1,6 @@
 # DFD Level 0
 
-This level represents the whole RVC automatic cleaning function as Process 0. Its external inputs and outputs are balanced with the System Context Diagram.
+Process 0 represents the complete automatic cleaning function and preserves the Context Diagram's external interface. The Cleaning Control Command now explicitly carries the abstract Normal/Boost power mode. Internal timer state is decomposed at Level 2.
 
 ```mermaid
 flowchart LR
@@ -21,7 +21,6 @@ flowchart LR
 | Obstacle Detection Input | Obstacle Detection Input | Sensors → Process 0 |
 | Dust Detection Input | Dust Detection Input | Sensors → Process 0 |
 | Movement Command | Movement Command | Process 0 → Drive and Cleaning Hardware |
-| Cleaning Control Command | Cleaning Control Command | Process 0 → Drive and Cleaning Hardware |
+| Cleaning Control Command | Cleaning Control Command with Normal/Boost mode | Process 0 → Drive and Cleaning Hardware |
 
-No data store or separate control flow is introduced at this level; neither is specified by the preliminary requirements.
-
+No external flow was added for the timer. `Simulation Tick` is an internal temporal event; the boost-state store is shown at Level 2.

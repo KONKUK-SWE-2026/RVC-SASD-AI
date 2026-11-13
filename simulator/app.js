@@ -170,7 +170,7 @@ function renderHistory(snapshot) {
       item.controller_state || "—",
       values,
       item.motor_output || "—",
-      item.cleaner_output?.action || "—",
+      `${item.cleaner_output?.action || "—"} · ${item.cleaner_output?.power_mode || "—"}`,
       item.transition || (item.controller_invoked ? "decision" : "sequence continuation"),
     ];
     for (const value of cells) {
@@ -195,10 +195,11 @@ function renderInspector(snapshot) {
   $("position").textContent = snapshot.position ? `(${snapshot.position.join(", ")})` : "—";
   $("direction").textContent = snapshot.direction || "—";
   $("controllerState").textContent = stateName(snapshot.controller_state);
-  $("cCalled").textContent = snapshot.controller_invoked ? "Yes" : snapshot.tick === 0 ? "Not yet" : "No · queued action";
+  $("cCalled").textContent = `${snapshot.timer_update_invoked ? "Timer yes" : "Timer not yet"} · ${snapshot.movement_decision_invoked ? "Decision yes" : "No new decision"}`;
   $("sensorState").textContent = JSON.stringify({
     current_map_reading: snapshot.sensors,
     sampled_by_C_this_tick: snapshot.controller_sampled_inputs ?? "No new C call",
+    dust_sampled_by_timer_this_tick: snapshot.timer_sampled_dust ?? false,
   }, null, 2);
   $("motorState").textContent = JSON.stringify({
     last_C_sequence: snapshot.controller_output?.movement_sequence ?? "No C output yet",
@@ -208,16 +209,20 @@ function renderInspector(snapshot) {
   $("cleanerState").textContent = JSON.stringify({
     output: snapshot.cleaner_output ?? "No cleaner command yet",
     last_C_cleaning_action: snapshot.controller_output?.cleaning_action ?? "No C output yet",
-    last_C_boost_request: snapshot.controller_output?.request_temporary_power_boost ?? "No C output yet",
+    active_power_mode: snapshot.power_mode ?? "NORMAL",
+    boost_ticks_remaining: snapshot.power_timer ?? 0,
   }, null, 2);
   $("internalState").textContent = JSON.stringify({
     previous_state: snapshot.transition?.split(" -> ")[0] ?? "Not changed this tick",
     current_state: snapshot.controller_state,
     last_obstacle_condition: snapshot.last_obstacle_condition,
+    movement_decision_invoked: snapshot.movement_decision_invoked ?? false,
+    timer_update_invoked: snapshot.timer_update_invoked ?? false,
     sequence_remaining: snapshot.sequence_remaining,
   }, null, 2);
   $("timerState").textContent = JSON.stringify({
-    power_boost_duration: snapshot.power_timer,
+    active_power_mode: snapshot.power_mode,
+    boost_ticks_remaining: snapshot.power_timer,
     turn_completion: snapshot.turn_timer,
   }, null, 2);
   $("transitionState").textContent = JSON.stringify({

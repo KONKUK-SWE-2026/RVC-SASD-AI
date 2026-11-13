@@ -1,10 +1,10 @@
-Start testing: Nov 06 15:54 KST
+Start testing: Nov 13 13:43 KST
 ----------------------------------------------------------
-1/10 Testing: RvcController.StartsInForwardStateAndMovesForwardWhenClear
-1/10 Test: RvcController.StartsInForwardStateAndMovesForwardWhenClear
+1/15 Testing: RvcController.StartsInForwardStateAndMovesForwardWhenClear
+1/15 Test: RvcController.StartsInForwardStateAndMovesForwardWhenClear
 Command: "/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests" "--gtest_filter=RvcController.StartsInForwardStateAndMovesForwardWhenClear" "--gtest_also_run_disabled_tests"
 Directory: /Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build
-"RvcController.StartsInForwardStateAndMovesForwardWhenClear" start time: Nov 06 15:54 KST
+"RvcController.StartsInForwardStateAndMovesForwardWhenClear" start time: Nov 13 13:43 KST
 Output:
 ----------------------------------------------------------
 Running main() from /opt/homebrew/Cellar/googletest/1.18.0/include/googletest/googletest/src/gtest_main.cc
@@ -20,18 +20,18 @@ Note: Google Test filter = RvcController.StartsInForwardStateAndMovesForwardWhen
 [==========] 1 test from 1 test suite ran. (0 ms total)
 [  PASSED  ] 1 test.
 <end of output>
-Test time =   0.02 sec
+Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"RvcController.StartsInForwardStateAndMovesForwardWhenClear" end time: Nov 06 15:54 KST
+"RvcController.StartsInForwardStateAndMovesForwardWhenClear" end time: Nov 13 13:43 KST
 "RvcController.StartsInForwardStateAndMovesForwardWhenClear" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-2/10 Testing: RvcController.ObstacleTurnsAsideThenContinuesForward
-2/10 Test: RvcController.ObstacleTurnsAsideThenContinuesForward
+2/15 Testing: RvcController.ObstacleTurnsAsideThenContinuesForward
+2/15 Test: RvcController.ObstacleTurnsAsideThenContinuesForward
 Command: "/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests" "--gtest_filter=RvcController.ObstacleTurnsAsideThenContinuesForward" "--gtest_also_run_disabled_tests"
 Directory: /Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build
-"RvcController.ObstacleTurnsAsideThenContinuesForward" start time: Nov 06 15:54 KST
+"RvcController.ObstacleTurnsAsideThenContinuesForward" start time: Nov 13 13:43 KST
 Output:
 ----------------------------------------------------------
 Running main() from /opt/homebrew/Cellar/googletest/1.18.0/include/googletest/googletest/src/gtest_main.cc
@@ -50,15 +50,15 @@ Note: Google Test filter = RvcController.ObstacleTurnsAsideThenContinuesForward
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"RvcController.ObstacleTurnsAsideThenContinuesForward" end time: Nov 06 15:54 KST
+"RvcController.ObstacleTurnsAsideThenContinuesForward" end time: Nov 13 13:43 KST
 "RvcController.ObstacleTurnsAsideThenContinuesForward" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-3/10 Testing: RvcController.AllDirectionsBlockedMovesBackwardTurnsAndThenMovesForward
-3/10 Test: RvcController.AllDirectionsBlockedMovesBackwardTurnsAndThenMovesForward
+3/15 Testing: RvcController.AllDirectionsBlockedMovesBackwardTurnsAndThenMovesForward
+3/15 Test: RvcController.AllDirectionsBlockedMovesBackwardTurnsAndThenMovesForward
 Command: "/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests" "--gtest_filter=RvcController.AllDirectionsBlockedMovesBackwardTurnsAndThenMovesForward" "--gtest_also_run_disabled_tests"
 Directory: /Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build
-"RvcController.AllDirectionsBlockedMovesBackwardTurnsAndThenMovesForward" start time: Nov 06 15:54 KST
+"RvcController.AllDirectionsBlockedMovesBackwardTurnsAndThenMovesForward" start time: Nov 13 13:43 KST
 Output:
 ----------------------------------------------------------
 Running main() from /opt/homebrew/Cellar/googletest/1.18.0/include/googletest/googletest/src/gtest_main.cc
@@ -77,24 +77,24 @@ Note: Google Test filter = RvcController.AllDirectionsBlockedMovesBackwardTurnsA
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"RvcController.AllDirectionsBlockedMovesBackwardTurnsAndThenMovesForward" end time: Nov 06 15:54 KST
+"RvcController.AllDirectionsBlockedMovesBackwardTurnsAndThenMovesForward" end time: Nov 13 13:43 KST
 "RvcController.AllDirectionsBlockedMovesBackwardTurnsAndThenMovesForward" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-4/10 Testing: RvcController.DustRequestsTemporaryCleaningPowerBoost
-4/10 Test: RvcController.DustRequestsTemporaryCleaningPowerBoost
-Command: "/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests" "--gtest_filter=RvcController.DustRequestsTemporaryCleaningPowerBoost" "--gtest_also_run_disabled_tests"
+4/15 Testing: RvcController.DustStartsFiveTickBoostAndReturnsToNormal
+4/15 Test: RvcController.DustStartsFiveTickBoostAndReturnsToNormal
+Command: "/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests" "--gtest_filter=RvcController.DustStartsFiveTickBoostAndReturnsToNormal" "--gtest_also_run_disabled_tests"
 Directory: /Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build
-"RvcController.DustRequestsTemporaryCleaningPowerBoost" start time: Nov 06 15:54 KST
+"RvcController.DustStartsFiveTickBoostAndReturnsToNormal" start time: Nov 13 13:43 KST
 Output:
 ----------------------------------------------------------
 Running main() from /opt/homebrew/Cellar/googletest/1.18.0/include/googletest/googletest/src/gtest_main.cc
-Note: Google Test filter = RvcController.DustRequestsTemporaryCleaningPowerBoost
+Note: Google Test filter = RvcController.DustStartsFiveTickBoostAndReturnsToNormal
 [==========] Running 1 test from 1 test suite.
 [----------] Global test environment set-up.
 [----------] 1 test from RvcController
-[ RUN      ] RvcController.DustRequestsTemporaryCleaningPowerBoost
-[       OK ] RvcController.DustRequestsTemporaryCleaningPowerBoost (0 ms)
+[ RUN      ] RvcController.DustStartsFiveTickBoostAndReturnsToNormal
+[       OK ] RvcController.DustStartsFiveTickBoostAndReturnsToNormal (0 ms)
 [----------] 1 test from RvcController (0 ms total)
 
 [----------] Global test environment tear-down
@@ -104,24 +104,24 @@ Note: Google Test filter = RvcController.DustRequestsTemporaryCleaningPowerBoost
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"RvcController.DustRequestsTemporaryCleaningPowerBoost" end time: Nov 06 15:54 KST
-"RvcController.DustRequestsTemporaryCleaningPowerBoost" time elapsed: 00:00:00
+"RvcController.DustStartsFiveTickBoostAndReturnsToNormal" end time: Nov 13 13:43 KST
+"RvcController.DustStartsFiveTickBoostAndReturnsToNormal" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-5/10 Testing: RvcController.ObstacleAndDustOutputsRemainIndependent
-5/10 Test: RvcController.ObstacleAndDustOutputsRemainIndependent
-Command: "/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests" "--gtest_filter=RvcController.ObstacleAndDustOutputsRemainIndependent" "--gtest_also_run_disabled_tests"
+5/15 Testing: RvcController.DustTimerCanBeActiveWhileObstacleHandlingStopsCleaning
+5/15 Test: RvcController.DustTimerCanBeActiveWhileObstacleHandlingStopsCleaning
+Command: "/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests" "--gtest_filter=RvcController.DustTimerCanBeActiveWhileObstacleHandlingStopsCleaning" "--gtest_also_run_disabled_tests"
 Directory: /Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build
-"RvcController.ObstacleAndDustOutputsRemainIndependent" start time: Nov 06 15:54 KST
+"RvcController.DustTimerCanBeActiveWhileObstacleHandlingStopsCleaning" start time: Nov 13 13:43 KST
 Output:
 ----------------------------------------------------------
 Running main() from /opt/homebrew/Cellar/googletest/1.18.0/include/googletest/googletest/src/gtest_main.cc
-Note: Google Test filter = RvcController.ObstacleAndDustOutputsRemainIndependent
+Note: Google Test filter = RvcController.DustTimerCanBeActiveWhileObstacleHandlingStopsCleaning
 [==========] Running 1 test from 1 test suite.
 [----------] Global test environment set-up.
 [----------] 1 test from RvcController
-[ RUN      ] RvcController.ObstacleAndDustOutputsRemainIndependent
-[       OK ] RvcController.ObstacleAndDustOutputsRemainIndependent (0 ms)
+[ RUN      ] RvcController.DustTimerCanBeActiveWhileObstacleHandlingStopsCleaning
+[       OK ] RvcController.DustTimerCanBeActiveWhileObstacleHandlingStopsCleaning (0 ms)
 [----------] 1 test from RvcController (0 ms total)
 
 [----------] Global test environment tear-down
@@ -131,15 +131,123 @@ Note: Google Test filter = RvcController.ObstacleAndDustOutputsRemainIndependent
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"RvcController.ObstacleAndDustOutputsRemainIndependent" end time: Nov 06 15:54 KST
-"RvcController.ObstacleAndDustOutputsRemainIndependent" time elapsed: 00:00:00
+"RvcController.DustTimerCanBeActiveWhileObstacleHandlingStopsCleaning" end time: Nov 13 13:43 KST
+"RvcController.DustTimerCanBeActiveWhileObstacleHandlingStopsCleaning" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-6/10 Testing: RvcController.StateFollowsEachObstacleCondition
-6/10 Test: RvcController.StateFollowsEachObstacleCondition
+6/15 Testing: RvcController.DustDetectedDuringBoostRefreshesFiveTickInterval
+6/15 Test: RvcController.DustDetectedDuringBoostRefreshesFiveTickInterval
+Command: "/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests" "--gtest_filter=RvcController.DustDetectedDuringBoostRefreshesFiveTickInterval" "--gtest_also_run_disabled_tests"
+Directory: /Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build
+"RvcController.DustDetectedDuringBoostRefreshesFiveTickInterval" start time: Nov 13 13:43 KST
+Output:
+----------------------------------------------------------
+Running main() from /opt/homebrew/Cellar/googletest/1.18.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = RvcController.DustDetectedDuringBoostRefreshesFiveTickInterval
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from RvcController
+[ RUN      ] RvcController.DustDetectedDuringBoostRefreshesFiveTickInterval
+[       OK ] RvcController.DustDetectedDuringBoostRefreshesFiveTickInterval (0 ms)
+[----------] 1 test from RvcController (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"RvcController.DustDetectedDuringBoostRefreshesFiveTickInterval" end time: Nov 13 13:43 KST
+"RvcController.DustDetectedDuringBoostRefreshesFiveTickInterval" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/15 Testing: RvcController.InitializationClearsBoostTimer
+7/15 Test: RvcController.InitializationClearsBoostTimer
+Command: "/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests" "--gtest_filter=RvcController.InitializationClearsBoostTimer" "--gtest_also_run_disabled_tests"
+Directory: /Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build
+"RvcController.InitializationClearsBoostTimer" start time: Nov 13 13:43 KST
+Output:
+----------------------------------------------------------
+Running main() from /opt/homebrew/Cellar/googletest/1.18.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = RvcController.InitializationClearsBoostTimer
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from RvcController
+[ RUN      ] RvcController.InitializationClearsBoostTimer
+[       OK ] RvcController.InitializationClearsBoostTimer (0 ms)
+[----------] 1 test from RvcController (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"RvcController.InitializationClearsBoostTimer" end time: Nov 13 13:43 KST
+"RvcController.InitializationClearsBoostTimer" time elapsed: 00:00:00
+----------------------------------------------------------
+
+8/15 Testing: RvcController.BoostTimerAdvancesOnEachTickIndependentOfMovementDecision
+8/15 Test: RvcController.BoostTimerAdvancesOnEachTickIndependentOfMovementDecision
+Command: "/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests" "--gtest_filter=RvcController.BoostTimerAdvancesOnEachTickIndependentOfMovementDecision" "--gtest_also_run_disabled_tests"
+Directory: /Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build
+"RvcController.BoostTimerAdvancesOnEachTickIndependentOfMovementDecision" start time: Nov 13 13:43 KST
+Output:
+----------------------------------------------------------
+Running main() from /opt/homebrew/Cellar/googletest/1.18.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = RvcController.BoostTimerAdvancesOnEachTickIndependentOfMovementDecision
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from RvcController
+[ RUN      ] RvcController.BoostTimerAdvancesOnEachTickIndependentOfMovementDecision
+[       OK ] RvcController.BoostTimerAdvancesOnEachTickIndependentOfMovementDecision (0 ms)
+[----------] 1 test from RvcController (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"RvcController.BoostTimerAdvancesOnEachTickIndependentOfMovementDecision" end time: Nov 13 13:43 KST
+"RvcController.BoostTimerAdvancesOnEachTickIndependentOfMovementDecision" time elapsed: 00:00:00
+----------------------------------------------------------
+
+9/15 Testing: RvcController.BoostOutputResumesOnlyWhenCleaningResumes
+9/15 Test: RvcController.BoostOutputResumesOnlyWhenCleaningResumes
+Command: "/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests" "--gtest_filter=RvcController.BoostOutputResumesOnlyWhenCleaningResumes" "--gtest_also_run_disabled_tests"
+Directory: /Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build
+"RvcController.BoostOutputResumesOnlyWhenCleaningResumes" start time: Nov 13 13:43 KST
+Output:
+----------------------------------------------------------
+Running main() from /opt/homebrew/Cellar/googletest/1.18.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = RvcController.BoostOutputResumesOnlyWhenCleaningResumes
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from RvcController
+[ RUN      ] RvcController.BoostOutputResumesOnlyWhenCleaningResumes
+[       OK ] RvcController.BoostOutputResumesOnlyWhenCleaningResumes (0 ms)
+[----------] 1 test from RvcController (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"RvcController.BoostOutputResumesOnlyWhenCleaningResumes" end time: Nov 13 13:43 KST
+"RvcController.BoostOutputResumesOnlyWhenCleaningResumes" time elapsed: 00:00:00
+----------------------------------------------------------
+
+10/15 Testing: RvcController.StateFollowsEachObstacleCondition
+10/15 Test: RvcController.StateFollowsEachObstacleCondition
 Command: "/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests" "--gtest_filter=RvcController.StateFollowsEachObstacleCondition" "--gtest_also_run_disabled_tests"
 Directory: /Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build
-"RvcController.StateFollowsEachObstacleCondition" start time: Nov 06 15:54 KST
+"RvcController.StateFollowsEachObstacleCondition" start time: Nov 13 13:43 KST
 Output:
 ----------------------------------------------------------
 Running main() from /opt/homebrew/Cellar/googletest/1.18.0/include/googletest/googletest/src/gtest_main.cc
@@ -158,15 +266,15 @@ Note: Google Test filter = RvcController.StateFollowsEachObstacleCondition
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"RvcController.StateFollowsEachObstacleCondition" end time: Nov 06 15:54 KST
+"RvcController.StateFollowsEachObstacleCondition" end time: Nov 13 13:43 KST
 "RvcController.StateFollowsEachObstacleCondition" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-7/10 Testing: RvcController.ClassifiesEveryFrontLeftRightSensorCombination
-7/10 Test: RvcController.ClassifiesEveryFrontLeftRightSensorCombination
+11/15 Testing: RvcController.ClassifiesEveryFrontLeftRightSensorCombination
+11/15 Test: RvcController.ClassifiesEveryFrontLeftRightSensorCombination
 Command: "/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests" "--gtest_filter=RvcController.ClassifiesEveryFrontLeftRightSensorCombination" "--gtest_also_run_disabled_tests"
 Directory: /Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build
-"RvcController.ClassifiesEveryFrontLeftRightSensorCombination" start time: Nov 06 15:54 KST
+"RvcController.ClassifiesEveryFrontLeftRightSensorCombination" start time: Nov 13 13:43 KST
 Output:
 ----------------------------------------------------------
 Running main() from /opt/homebrew/Cellar/googletest/1.18.0/include/googletest/googletest/src/gtest_main.cc
@@ -185,15 +293,15 @@ Note: Google Test filter = RvcController.ClassifiesEveryFrontLeftRightSensorComb
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"RvcController.ClassifiesEveryFrontLeftRightSensorCombination" end time: Nov 06 15:54 KST
+"RvcController.ClassifiesEveryFrontLeftRightSensorCombination" end time: Nov 13 13:43 KST
 "RvcController.ClassifiesEveryFrontLeftRightSensorCombination" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-8/10 Testing: RvcController.AppliesEachObstacleConditionFromEveryCurrentState
-8/10 Test: RvcController.AppliesEachObstacleConditionFromEveryCurrentState
+12/15 Testing: RvcController.AppliesEachObstacleConditionFromEveryCurrentState
+12/15 Test: RvcController.AppliesEachObstacleConditionFromEveryCurrentState
 Command: "/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests" "--gtest_filter=RvcController.AppliesEachObstacleConditionFromEveryCurrentState" "--gtest_also_run_disabled_tests"
 Directory: /Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build
-"RvcController.AppliesEachObstacleConditionFromEveryCurrentState" start time: Nov 06 15:54 KST
+"RvcController.AppliesEachObstacleConditionFromEveryCurrentState" start time: Nov 13 13:43 KST
 Output:
 ----------------------------------------------------------
 Running main() from /opt/homebrew/Cellar/googletest/1.18.0/include/googletest/googletest/src/gtest_main.cc
@@ -212,15 +320,15 @@ Note: Google Test filter = RvcController.AppliesEachObstacleConditionFromEveryCu
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"RvcController.AppliesEachObstacleConditionFromEveryCurrentState" end time: Nov 06 15:54 KST
+"RvcController.AppliesEachObstacleConditionFromEveryCurrentState" end time: Nov 13 13:43 KST
 "RvcController.AppliesEachObstacleConditionFromEveryCurrentState" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-9/10 Testing: RvcController.RejectsNullStepArguments
-9/10 Test: RvcController.RejectsNullStepArguments
+13/15 Testing: RvcController.RejectsNullStepArguments
+13/15 Test: RvcController.RejectsNullStepArguments
 Command: "/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests" "--gtest_filter=RvcController.RejectsNullStepArguments" "--gtest_also_run_disabled_tests"
 Directory: /Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build
-"RvcController.RejectsNullStepArguments" start time: Nov 06 15:54 KST
+"RvcController.RejectsNullStepArguments" start time: Nov 13 13:43 KST
 Output:
 ----------------------------------------------------------
 Running main() from /opt/homebrew/Cellar/googletest/1.18.0/include/googletest/googletest/src/gtest_main.cc
@@ -239,15 +347,42 @@ Note: Google Test filter = RvcController.RejectsNullStepArguments
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"RvcController.RejectsNullStepArguments" end time: Nov 06 15:54 KST
+"RvcController.RejectsNullStepArguments" end time: Nov 13 13:43 KST
 "RvcController.RejectsNullStepArguments" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-10/10 Testing: RvcController.NullInitializationIsSafe
-10/10 Test: RvcController.NullInitializationIsSafe
+14/15 Testing: RvcController.RejectsNullTickArguments
+14/15 Test: RvcController.RejectsNullTickArguments
+Command: "/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests" "--gtest_filter=RvcController.RejectsNullTickArguments" "--gtest_also_run_disabled_tests"
+Directory: /Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build
+"RvcController.RejectsNullTickArguments" start time: Nov 13 13:43 KST
+Output:
+----------------------------------------------------------
+Running main() from /opt/homebrew/Cellar/googletest/1.18.0/include/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = RvcController.RejectsNullTickArguments
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from RvcController
+[ RUN      ] RvcController.RejectsNullTickArguments
+[       OK ] RvcController.RejectsNullTickArguments (0 ms)
+[----------] 1 test from RvcController (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"RvcController.RejectsNullTickArguments" end time: Nov 13 13:43 KST
+"RvcController.RejectsNullTickArguments" time elapsed: 00:00:00
+----------------------------------------------------------
+
+15/15 Testing: RvcController.NullInitializationIsSafe
+15/15 Test: RvcController.NullInitializationIsSafe
 Command: "/Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build/rvc_controller_tests" "--gtest_filter=RvcController.NullInitializationIsSafe" "--gtest_also_run_disabled_tests"
 Directory: /Users/jeonghogyun/Documents/dev/konkuk/assignment/swe/261030_RVC_SASD_Codex_real/build
-"RvcController.NullInitializationIsSafe" start time: Nov 06 15:54 KST
+"RvcController.NullInitializationIsSafe" start time: Nov 13 13:43 KST
 Output:
 ----------------------------------------------------------
 Running main() from /opt/homebrew/Cellar/googletest/1.18.0/include/googletest/googletest/src/gtest_main.cc
@@ -266,8 +401,8 @@ Note: Google Test filter = RvcController.NullInitializationIsSafe
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"RvcController.NullInitializationIsSafe" end time: Nov 06 15:54 KST
+"RvcController.NullInitializationIsSafe" end time: Nov 13 13:43 KST
 "RvcController.NullInitializationIsSafe" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-End testing: Nov 06 15:54 KST
+End testing: Nov 13 13:43 KST

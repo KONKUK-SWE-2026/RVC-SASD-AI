@@ -15,7 +15,7 @@ TEST(RvcController, StartsInForwardStateAndMovesForwardWhenClear)
     EXPECT_EQ(output.movement_count, 1U);
     EXPECT_EQ(output.movement[0], RVC_MOVE_FORWARD);
     EXPECT_EQ(output.cleaning_action, RVC_CLEANING_AND_MOP);
-    EXPECT_FALSE(output.request_temporary_power_boost);
+    EXPECT_EQ(output.cleaning_power_mode, RVC_POWER_NORMAL);
 }
 
 TEST(RvcController, ObstacleTurnsAsideThenContinuesForward)
@@ -47,34 +47,118 @@ TEST(RvcController, AllDirectionsBlockedMovesBackwardTurnsAndThenMovesForward)
     EXPECT_EQ(output.movement[0], RVC_MOVE_BACKWARD);
     EXPECT_EQ(output.movement[1], RVC_MOVE_TURN_ASIDE);
     EXPECT_EQ(output.movement[2], RVC_MOVE_FORWARD);
-    EXPECT_EQ(output.cleaning_action, RVC_CLEANING_STOP_THEN_UNSPECIFIED);
+    EXPECT_EQ(output.cleaning_action, RVC_CLEANING_STOP_THEN_CLEAN_AND_MOP);
     EXPECT_EQ(controller.state, RVC_STATE_ALL_DIRECTIONS_BLOCKED);
 }
 
-TEST(RvcController, DustRequestsTemporaryCleaningPowerBoost)
+TEST(RvcController, DustStartsFiveTickBoostAndReturnsToNormal)
 {
     RvcController controller{};
-    RvcControllerOutput output{};
-    const RvcSensorInput input{false, false, false, true};
+    RvcCleaningPowerState power{};
 
     rvc_controller_init(&controller);
-    ASSERT_TRUE(rvc_controller_step(&controller, &input, &output));
+    ASSERT_TRUE(rvc_controller_advance_tick(&controller, true, true, &power));
+    EXPECT_EQ(power.mode, RVC_POWER_BOOST);
+    EXPECT_EQ(power.remaining_ticks, 5U);
 
-    EXPECT_TRUE(output.request_temporary_power_boost);
-    EXPECT_EQ(output.cleaning_action, RVC_CLEANING_AND_MOP);
+    for (unsigned int remaining = 4U; remaining > 0U; --remaining) {
+        ASSERT_TRUE(rvc_controller_advance_tick(&controller, false, true, &power));
+        EXPECT_EQ(power.mode, RVC_POWER_BOOST);
+        EXPECT_EQ(power.remaining_ticks, remaining);
+    }
+    ASSERT_TRUE(rvc_controller_advance_tick(&controller, false, true, &power));
+    EXPECT_EQ(power.mode, RVC_POWER_NORMAL);
+    EXPECT_EQ(power.remaining_ticks, 0U);
 }
 
-TEST(RvcController, ObstacleAndDustOutputsRemainIndependent)
+TEST(RvcController, DustTimerCanBeActiveWhileObstacleHandlingStopsCleaning)
 {
     RvcController controller{};
     RvcControllerOutput output{};
+    RvcCleaningPowerState power{};
     const RvcSensorInput input{true, false, false, true};
 
     rvc_controller_init(&controller);
+    ASSERT_TRUE(rvc_controller_advance_tick(&controller, input.dust_detected, false, &power));
     ASSERT_TRUE(rvc_controller_step(&controller, &input, &output));
 
     EXPECT_EQ(output.cleaning_action, RVC_CLEANING_STOP_THEN_CLEAN_AND_MOP);
-    EXPECT_TRUE(output.request_temporary_power_boost);
+    EXPECT_EQ(output.cleaning_power_mode, RVC_POWER_NORMAL);
+    EXPECT_EQ(power.mode, RVC_POWER_NORMAL);
+    EXPECT_EQ(power.remaining_ticks, 5U);
+}
+
+TEST(RvcController, DustDetectedDuringBoostRefreshesFiveTickInterval)
+{
+    RvcController controller{};
+    RvcCleaningPowerState power{};
+    rvc_controller_init(&controller);
+
+    ASSERT_TRUE(rvc_controller_advance_tick(&controller, true, true, &power));
+    ASSERT_TRUE(rvc_controller_advance_tick(&controller, false, true, &power));
+    EXPECT_EQ(power.remaining_ticks, 4U);
+    ASSERT_TRUE(rvc_controller_advance_tick(&controller, true, true, &power));
+    EXPECT_EQ(power.mode, RVC_POWER_BOOST);
+    EXPECT_EQ(power.remaining_ticks, 5U);
+
+    for (unsigned int remaining = 4U; remaining > 0U; --remaining) {
+        ASSERT_TRUE(rvc_controller_advance_tick(&controller, false, true, &power));
+        EXPECT_EQ(power.remaining_ticks, remaining);
+        EXPECT_EQ(power.mode, RVC_POWER_BOOST);
+    }
+    ASSERT_TRUE(rvc_controller_advance_tick(&controller, false, true, &power));
+    EXPECT_EQ(power.mode, RVC_POWER_NORMAL);
+}
+
+TEST(RvcController, InitializationClearsBoostTimer)
+{
+    RvcController controller{};
+    RvcCleaningPowerState power{};
+    rvc_controller_init(&controller);
+    ASSERT_TRUE(rvc_controller_advance_tick(&controller, true, true, &power));
+    ASSERT_EQ(controller.boost_ticks_remaining, 5U);
+
+    rvc_controller_init(&controller);
+    EXPECT_EQ(controller.boost_ticks_remaining, 0U);
+    ASSERT_TRUE(rvc_controller_advance_tick(&controller, false, true, &power));
+    EXPECT_EQ(power.mode, RVC_POWER_NORMAL);
+}
+
+TEST(RvcController, BoostTimerAdvancesOnEachTickIndependentOfMovementDecision)
+{
+    RvcController controller{};
+    RvcControllerOutput output{};
+    RvcCleaningPowerState power{};
+    const RvcSensorInput obstacle{true, false, false, false};
+    rvc_controller_init(&controller);
+    ASSERT_TRUE(rvc_controller_advance_tick(&controller, true, false, &power));
+    ASSERT_TRUE(rvc_controller_step(&controller, &obstacle, &output));
+    ASSERT_EQ(output.movement_count, 2U);
+
+    for (unsigned int remaining = 4U; remaining > 0U; --remaining) {
+        ASSERT_TRUE(rvc_controller_advance_tick(&controller, false, false, &power));
+        EXPECT_EQ(power.remaining_ticks, remaining);
+        EXPECT_EQ(power.mode, RVC_POWER_NORMAL);
+    }
+}
+
+TEST(RvcController, BoostOutputResumesOnlyWhenCleaningResumes)
+{
+    RvcController controller{};
+    RvcCleaningPowerState power{};
+    rvc_controller_init(&controller);
+
+    ASSERT_TRUE(rvc_controller_advance_tick(&controller, true, false, &power));
+    EXPECT_EQ(power.mode, RVC_POWER_NORMAL);
+    EXPECT_EQ(power.remaining_ticks, 5U);
+
+    ASSERT_TRUE(rvc_controller_advance_tick(&controller, false, false, &power));
+    EXPECT_EQ(power.mode, RVC_POWER_NORMAL);
+    EXPECT_EQ(power.remaining_ticks, 4U);
+
+    ASSERT_TRUE(rvc_controller_advance_tick(&controller, false, true, &power));
+    EXPECT_EQ(power.mode, RVC_POWER_BOOST);
+    EXPECT_EQ(power.remaining_ticks, 3U);
 }
 
 TEST(RvcController, StateFollowsEachObstacleCondition)
@@ -140,7 +224,7 @@ TEST(RvcController, AppliesEachObstacleConditionFromEveryCurrentState)
 
     for (const auto state : states) {
         for (size_t i = 0; i < 3; ++i) {
-            RvcController controller{state};
+            RvcController controller{state, 0U};
             RvcControllerOutput output{};
             ASSERT_TRUE(rvc_controller_step(&controller, &inputs[i], &output));
             EXPECT_EQ(controller.state, expected[i]);
@@ -158,6 +242,14 @@ TEST(RvcController, RejectsNullStepArguments)
     EXPECT_FALSE(rvc_controller_step(nullptr, &input, &output));
     EXPECT_FALSE(rvc_controller_step(&controller, nullptr, &output));
     EXPECT_FALSE(rvc_controller_step(&controller, &input, nullptr));
+}
+
+TEST(RvcController, RejectsNullTickArguments)
+{
+    RvcController controller{};
+    RvcCleaningPowerState power{};
+    EXPECT_FALSE(rvc_controller_advance_tick(nullptr, false, false, &power));
+    EXPECT_FALSE(rvc_controller_advance_tick(&controller, false, false, nullptr));
 }
 
 TEST(RvcController, NullInitializationIsSafe)

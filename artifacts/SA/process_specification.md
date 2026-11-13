@@ -4,345 +4,113 @@
 
 ### Process 0 — Perform Automatic Cleaning
 
-#### Process Identification
-
-| Field | Description |
-|---|---|
-| Process ID | 0 |
-| Process Name | Perform Automatic Cleaning |
-| DFD Level | Level 0 |
-| Parent Process | None — system process |
-
-#### Purpose
-Automatically clean and mop the household surface while directing RVC movement and cleaning behavior in response to obstacle and dust detections.
-
-#### Inputs
-- Obstacle Detection Input
-- Dust Detection Input
-
-#### Outputs
-- Movement Command
-- Cleaning Control Command
-
-#### Trigger / Execution Condition
-The function operates automatically. The requirements do not specify an external start trigger, sampling interval, or execution schedule.
-
-#### Processing Logic
-1. Receive obstacle detections for the front, left, and right directions and dust detection from Sensors.
-2. During automatic cleaning, direct forward movement and cleaning/mopping.
-3. If an obstacle is detected, direct cleaning to stop and direct the RVC to turn aside left or right, then move forward with cleaning.
-4. If obstacles are detected in the front, left, and right directions, direct the RVC to move backward, turn aside left or right, and then move forward. The requirements do not explicitly state the cleaning state during this final forward movement.
-5. If dust is detected, direct cleaning power to increase temporarily. The duration and power level are unspecified.
-
-The requirements do not define how a left/right turn is selected, how simultaneous dust and obstacle detections are prioritized, or the exact timing of sensor evaluation and cleaning commands.
-
-#### Relevant Requirements
-- Preliminary requirements, bullet 1: automatic cleaning and mopping.
-- Preliminary requirements, bullet 2: forward movement while cleaning.
-- Preliminary requirements, bullets 3–4: obstacle response and all-directions-blocked response.
-- Preliminary requirements, bullet 5: temporarily increase cleaning power when dust is detected.
+- **Purpose:** Automatically clean and mop household surfaces, directing movement and cleaning behavior from sensor inputs.
+- **Inputs:** Obstacle Detection Input; Dust Detection Input.
+- **Outputs:** Movement Command; Cleaning Control Command.
+- **Trigger:** Automatic operation. A logical Simulation Tick occurs for each simulator update; wall-clock cadence is outside scope.
+- **Processing logic:**
+  1. Receive front/left/right obstacle detections and the current tick's dust detection.
+  2. Direct forward movement and cleaning/mopping when no obstacle is detected.
+  3. For a partial obstacle, direct cleaning stop, turn aside, and forward movement with cleaning.
+  4. For all three specified directions blocked, stop cleaning during backward and turn-aside actions, then resume cleaning during forward movement.
+  5. On each Simulation Tick, update the dust boost timer. A positive dust input sets remaining ticks to 5. With no dust, decrement a positive count once.
+  6. Emit Boost only when cleaning is active and the updated count is positive; emit Normal when cleaning is stopped or the count is zero. Dust while Boost is active refreshes the timer to 5.
+- **Requirements:** RVC-01–RVC-05.
 
 ## DFD Level 1
 
 ### Process 1 — Determine Movement Response
 
-#### Process Identification
-
-| Field | Description |
-|---|---|
-| Process ID | 1 |
-| Process Name | Determine Movement Response |
-| DFD Level | Level 1 |
-| Parent Process | 0 — Perform Automatic Cleaning |
-
-#### Purpose
-Direct RVC movement in response to obstacle detections.
-
-#### Inputs
-- Obstacle Detection Input
-
-#### Outputs
-- Movement Command
-
-#### Trigger / Execution Condition
-During automatic cleaning and when obstacle detections are received. The requirements do not specify the sensor sampling interval.
-
-#### Processing Logic
-1. Receive obstacle detections for the front, left, and right directions.
-2. If obstacles are detected in all three directions, direct the RVC to move backward, turn aside left or right, and then move forward.
-3. Otherwise, if an obstacle is detected, direct the RVC to turn aside left or right and then move forward.
-4. If no obstacle is detected, direct the RVC to move forward.
-
-The requirements do not specify how to choose left or right. The all-three-directions-blocked case uses the separately stated backward response.
-
-#### Relevant Requirements
-- Preliminary requirements, bullet 2: move forward while cleaning.
-- Preliminary requirements, bullets 3–4: turn aside on obstacle detection and move backward when the front, left, and right are blocked.
+- **Purpose:** Direct movement in response to obstacle detections.
+- **Inputs:** Obstacle Detection Input.
+- **Outputs:** Movement Command.
+- **Trigger:** Obstacle sensor snapshot during automatic operation.
+- **Processing logic:** If all front/left/right are blocked, issue backward, turn-aside, forward. Else if any is blocked, issue turn-aside, forward. Otherwise issue forward. The left/right choice remains unspecified.
+- **Requirements:** RVC-02–RVC-04.
 
 ### Process 2 — Control Cleaning Behavior
 
-#### Process Identification
-
-| Field | Description |
-|---|---|
-| Process ID | 2 |
-| Process Name | Control Cleaning Behavior |
-| DFD Level | Level 1 |
-| Parent Process | 0 — Perform Automatic Cleaning |
-
-#### Purpose
-Direct cleaning and mopping during automatic operation, including the stated obstacle response and temporary cleaning power increase for dust.
-
-#### Inputs
-- Obstacle Detection Input
-- Dust Detection Input
-
-#### Outputs
-- Cleaning Control Command
-
-#### Trigger / Execution Condition
-During automatic cleaning and when obstacle or dust detections are received. The requirements do not specify the sensor sampling interval.
-
-#### Processing Logic
-1. During automatic cleaning, direct cleaning and mopping.
-2. When an obstacle is detected, direct cleaning to stop during obstacle handling; for the general avoidance case, direct cleaning to resume as the RVC goes forward with cleaning.
-3. When dust is detected, direct cleaning power to increase for a while.
-
-The requirements do not specify how obstacle handling and dust detection are prioritized when simultaneous, how long cleaning power is increased, or whether cleaning is active during the final forward movement in the all-three-directions-blocked case.
-
-#### Relevant Requirements
-- Preliminary requirements, bullet 1: automatically clean and mop.
-- Preliminary requirements, bullet 3: stop cleaning during obstacle handling and resume cleaning while moving forward.
-- Preliminary requirements, bullet 5: increase cleaning power temporarily when dust is detected.
+- **Purpose:** Direct cleaning/mopping and maintain the dust-based power mode.
+- **Inputs:** Obstacle Detection Input; Dust Detection Input; internal Simulation Tick.
+- **Outputs:** Cleaning Control Command.
+- **Trigger:** Every simulation tick, including ticks executing a queued movement action.
+- **Processing logic:** Determine the current action's cleaning activity; update D1 every tick; combine cleaning activity with the updated boost interval. Emit Boost only during active cleaning while the interval remains positive. A dust-positive tick refreshes the interval even when already Boosting.
+- **Requirements:** RVC-01, RVC-03–RVC-05.
 
 ## DFD Level 2
 
 ### Process 1.1 — Classify Obstacle Condition
 
-#### Process Identification
-
-| Field | Description |
-|---|---|
-| Process ID | 1.1 |
-| Process Name | Classify Obstacle Condition |
-| DFD Level | Level 2 |
-| Parent Process | 1 — Determine Movement Response |
-
-#### Purpose
-Classify the obstacle sensor results into conditions needed to select the movement response stated in the requirements.
-
-#### Inputs
-- Obstacle Detection Input
-
-#### Outputs
-- Obstacle Response Condition
-
-#### Trigger / Execution Condition
-When obstacle detections are received during automatic cleaning.
-
-#### Processing Logic
-1. Examine the reported front, left, and right obstacle detections.
-2. If all three directions report obstacles, output the all-three-directions-blocked condition.
-3. Otherwise, if any obstacle is reported, output the obstacle-detected condition.
-4. If no obstacle is reported, output the no-obstacle condition.
-
-#### Relevant Requirements
-- Preliminary requirements, bullets 2–4.
+- **Parent:** Process 1.
+- **Inputs:** Obstacle Detection Input.
+- **Outputs:** Obstacle Response Condition.
+- **Logic:** All three true → all-directions-blocked; any true → partial obstacle; all false → clear.
+- **Requirement:** RVC-02–RVC-04.
 
 ### Process 1.2 — Issue Movement Command
 
-#### Process Identification
-
-| Field | Description |
-|---|---|
-| Process ID | 1.2 |
-| Process Name | Issue Movement Command |
-| DFD Level | Level 2 |
-| Parent Process | 1 — Determine Movement Response |
-
-#### Purpose
-Produce movement commands based on the classified obstacle condition.
-
-#### Inputs
-- Obstacle Response Condition
-
-#### Outputs
-- Movement Command
-
-#### Trigger / Execution Condition
-When an Obstacle Response Condition is received.
-
-#### Processing Logic
-1. For the no-obstacle condition, direct forward movement.
-2. For the obstacle-detected condition, direct a left or right turn aside, then forward movement.
-3. For the all-three-directions-blocked condition, direct backward movement, a left or right turn aside, then forward movement.
-
-The requirements do not specify how to choose left or right.
-
-#### Relevant Requirements
-- Preliminary requirements, bullets 2–4.
+- **Parent:** Process 1.
+- **Inputs:** Obstacle Response Condition.
+- **Outputs:** Movement Command.
+- **Logic:** Clear → forward; partial → turn aside then forward; all blocked → backward, turn aside, then forward. Side selection is unspecified.
+- **Requirement:** RVC-02–RVC-04.
 
 ### Process 2.1 — Determine Obstacle Cleaning Action
 
-#### Process Identification
+- **Parent:** Process 2.
+- **Inputs:** Obstacle Detection Input.
+- **Outputs:** Obstacle-Related Cleaning Action; Cleaning Active Indicator for the current movement-sequence action.
+- **Logic:** Stop cleaning during turn-aside obstacle handling and resume while moving forward. For all-directions-blocked recovery, stop during backward and turn-aside actions, then resume while moving forward.
+- **Requirements:** RVC-01, RVC-03, RVC-04.
 
-| Field | Description |
-|---|---|
-| Process ID | 2.1 |
-| Process Name | Determine Obstacle Cleaning Action |
-| DFD Level | Level 2 |
-| Parent Process | 2 — Control Cleaning Behavior |
+### Process 2.2 — Maintain Dust Boost State
 
-#### Purpose
-Determine the cleaning actions required by obstacle handling.
-
-#### Inputs
-- Obstacle Detection Input
-
-#### Outputs
-- Obstacle-Related Cleaning Action
-
-#### Trigger / Execution Condition
-When obstacle detections are received during automatic cleaning.
-
-#### Processing Logic
-1. If an obstacle is detected, direct cleaning to stop during obstacle handling.
-2. For the general avoidance case, indicate that cleaning resumes during the following forward movement, as stated in the requirements.
-3. For the all-three-directions-blocked case, preserve the stated movement-specific response. The requirements do not clarify whether the general stop/resume cleaning behavior also applies to this case, including its final forward movement.
-
-#### Relevant Requirements
-- Preliminary requirements, bullets 1, 3, and 4.
-
-### Process 2.2 — Determine Dust Power Adjustment
-
-#### Process Identification
-
-| Field | Description |
-|---|---|
-| Process ID | 2.2 |
-| Process Name | Determine Dust Power Adjustment |
-| DFD Level | Level 2 |
-| Parent Process | 2 — Control Cleaning Behavior |
-
-#### Purpose
-Determine whether dust detection calls for temporarily increased cleaning power.
-
-#### Inputs
-- Dust Detection Input
-
-#### Outputs
-- Dust Power Adjustment
-
-#### Trigger / Execution Condition
-When a dust detection result is received during automatic cleaning.
-
-#### Processing Logic
-1. If dust is detected, output a request to increase cleaning power temporarily.
-2. If dust is not detected, output no dust-related power increase request.
-
-The requirements do not specify the power level or duration.
-
-#### Relevant Requirements
-- Preliminary requirements, bullet 5.
+- **Parent:** Process 2.
+- **Inputs:** Dust Detection Input; Simulation Tick; Cleaning Active Indicator; Previous Remaining Boost Ticks from D1.
+- **Outputs:** Updated Remaining Boost Ticks to D1; effective Dust Power State.
+- **Logic:** On dust-positive tick set count to 5. Else decrement once if positive. Report Boost only when cleaning is active and updated count >0; otherwise report Normal. This process runs every tick, regardless of whether Process 1 selects a new movement sequence.
+- **Requirement:** RVC-05.
 
 ### Process 2.3 — Generate Cleaning Control Command
 
-#### Process Identification
-
-| Field | Description |
-|---|---|
-| Process ID | 2.3 |
-| Process Name | Generate Cleaning Control Command |
-| DFD Level | Level 2 |
-| Parent Process | 2 — Control Cleaning Behavior |
-
-#### Purpose
-Produce the cleaning control command for automatic cleaning and mopping, applying obstacle-related cleaning actions and any requested dust-related power increase.
-
-#### Inputs
-- Obstacle-Related Cleaning Action
-- Dust Power Adjustment
-
-#### Outputs
-- Cleaning Control Command
-
-#### Trigger / Execution Condition
-During automatic cleaning. The requirements do not define sensor sampling, input update timing, or synchronization.
-
-#### Processing Logic
-1. Direct automatic cleaning and mopping as the stated baseline behavior.
-2. Apply the specified stop/resume action from Obstacle-Related Cleaning Action. Preserve as unspecified the cleaning state during the final forward movement in the all-three-directions-blocked case.
-3. Apply a temporary cleaning power increase when Dust Power Adjustment requests it.
-
-The requirements do not specify how simultaneous obstacle-related actions and dust-related power increases are prioritized or combined, or the cleaning state during the final forward movement in the all-three-directions-blocked case.
-
-#### Relevant Requirements
-- Preliminary requirements, bullets 1, 3–5.
+- **Parent:** Process 2.
+- **Inputs:** Obstacle-Related Cleaning Action; effective Dust Power State.
+- **Outputs:** Cleaning Control Command.
+- **Logic:** Combine the obstacle cleaning action with effective Normal/Boost power mode. Do not command Boost while cleaning is stopped. Do not assign a numeric power magnitude.
+- **Requirements:** RVC-01, RVC-03–RVC-05.
 
 ## DFD Level 3
 
 ### Process 1.2.1 — Select Movement Sequence
 
-#### Process Identification
-
-| Field | Description |
-|---|---|
-| Process ID | 1.2.1 |
-| Process Name | Select Movement Sequence |
-| DFD Level | Level 3 |
-| Parent Process | 1.2 — Issue Movement Command |
-
-#### Purpose
-Select the movement action sequence corresponding to the obstacle response condition.
-
-#### Inputs
-- Obstacle Response Condition
-
-#### Outputs
-- Selected Movement Sequence
-
-#### Trigger / Execution Condition
-When an Obstacle Response Condition is received.
-
-#### Processing Logic
-1. For no obstacle, select forward movement.
-2. For an obstacle condition other than all three specified directions being blocked, select turning aside left or right followed by forward movement.
-3. When obstacles are detected in front, left, and right, select backward movement followed by turning aside left or right and then forward movement.
-
-The requirements do not specify how to choose left or right.
-
-#### Relevant Requirements
-- Preliminary requirements, bullets 2–4.
+- **Parent:** Process 1.2.
+- **Inputs:** Obstacle Response Condition.
+- **Outputs:** Selected Movement Sequence.
+- **Logic:** Clear → forward; partial → turn-aside then forward; all blocked → backward, turn-aside, forward. Left/right choice is unspecified.
+- **Requirements:** RVC-02–RVC-04.
 
 ### Process 1.2.2 — Produce Movement Command
 
-#### Process Identification
+- **Parent:** Process 1.2.
+- **Inputs:** Selected Movement Sequence.
+- **Outputs:** Movement Command.
+- **Logic:** Encode and deliver the abstract selected sequence; hardware encoding remains outside scope.
+- **Requirements:** RVC-02–RVC-04.
 
-| Field | Description |
-|---|---|
-| Process ID | 1.2.2 |
-| Process Name | Produce Movement Command |
-| DFD Level | Level 3 |
-| Parent Process | 1.2 — Issue Movement Command |
+### Process 2.2.1 — Update Dust Boost Timer State
 
-#### Purpose
-Produce the abstract movement command for the selected movement sequence.
+- **Parent:** Process 2.2.
+- **Inputs:** Dust Detection Input; Simulation Tick; Previous Remaining Boost Ticks from D1.
+- **Outputs:** Updated Remaining Boost Ticks to D1 and Process 2.2.2.
+- **Logic:** On a dust-positive tick set count to 5, including a retrigger during Boost. Otherwise decrement once when count is positive. Do not pause the count while queued movement actions execute.
+- **Requirement:** RVC-05.
 
-#### Inputs
-- Selected Movement Sequence
+### Process 2.2.2 — Determine Active Power Mode
 
-#### Outputs
-- Movement Command
+- **Parent:** Process 2.2.
+- **Inputs:** Updated Remaining Boost Ticks; Cleaning Active Indicator.
+- **Outputs:** Effective Dust Power State to Process 2.3.
+- **Logic:** Cleaning active and count >0 → Boost; otherwise → Normal.
+- **Requirement:** RVC-05.
 
-#### Trigger / Execution Condition
-When a Selected Movement Sequence is received.
-
-#### Processing Logic
-1. Receive the selected movement sequence.
-2. Produce a Movement Command representing that sequence for Drive and Cleaning Hardware.
-
-The requirements do not define command encoding, timing, or hardware control details.
-
-#### Relevant Requirements
-- Preliminary requirements, bullets 2–4.
-
+The process interfaces and state-store interactions match DFD Levels 2–3 and the Data Dictionary. No Process Specification is generated for the Level 4 FSM itself.

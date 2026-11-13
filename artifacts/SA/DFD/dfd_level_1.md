@@ -1,6 +1,6 @@
 # DFD Level 1
 
-Process 0 is decomposed into movement response and cleaning behavior. Obstacle detections are supplied to both processes because the requirements use obstacle information for movement and for stopping cleaning. The Level 0 external interface is preserved.
+Process 0 is decomposed into movement response and cleaning behavior. The latter maintains the dust boost interval and emits the active power mode. The external input and output flows remain balanced with Level 0.
 
 ```mermaid
 flowchart LR
@@ -21,15 +21,15 @@ flowchart LR
 | Parent Process | Child Process | Responsibility |
 |---|---|---|
 | 0: Perform Automatic Cleaning | 1: Determine Movement Response | Select forward, turn-aside, or backward movement in response to obstacle detections. |
-| 0: Perform Automatic Cleaning | 2: Control Cleaning Behavior | Direct cleaning/mopping, stop cleaning during obstacle handling, and temporarily increase cleaning power when dust is detected. |
+| 0: Perform Automatic Cleaning | 2: Control Cleaning Behavior | Direct cleaning/mopping, obstacle-related stop/resume behavior, and dust boost state for five simulation ticks. |
 
 ## Balancing with Level 0
 
 | Process 0 Interface | Level 1 Flow(s) | Direction |
 |---|---|---|
-| Obstacle Detection Input | Obstacle Detection Input to Processes 1 and 2 | Sensors → child processes |
-| Dust Detection Input | Dust Detection Input to Process 2 | Sensors → child process |
-| Movement Command | Movement Command from Process 1 | Child process → Drive and Cleaning Hardware |
-| Cleaning Control Command | Cleaning Control Command from Process 2 | Child process → Drive and Cleaning Hardware |
+| Obstacle Detection Input | Input to Processes 1 and 2 | Sensors → child processes |
+| Dust Detection Input | Input to Process 2 | Sensors → child process |
+| Movement Command | Output from Process 1 | Child process → Drive and Cleaning Hardware |
+| Cleaning Control Command | Output from Process 2, including Normal/Boost mode | Child process → Drive and Cleaning Hardware |
 
-No internal data flow or data store is introduced. Both external inputs and both external outputs of Process 0 are preserved; the obstacle input is used by both child processes.
+The Simulation Tick event and timer state are internal to Process 2 and will be decomposed at Level 2; no new external input or output is introduced.

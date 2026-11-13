@@ -2,82 +2,81 @@
 
 ## 1. Objective
 
-Identify the input-processing, decision, and output-generation regions from the SA DFD hierarchy and use those boundaries to derive the module structure.
+Identify input, decision, and output regions from the revised SA, including the timer update that occurs every simulation tick.
 
 ## 2. Transform Regions
 
 ### Afferent Flow (Input)
 
-| Process ID | Process Name | Input | Output |
-|---|---|---|---|
-| 1.1 | Classify Obstacle Condition | Obstacle Detection Input | Obstacle Response Condition |
+| Process | Input | Output |
+|---|---|---|
+| 1.1 Classify Obstacle Condition | Obstacle Detection Input | Obstacle Response Condition |
+| 2.2.1 Update Dust Boost Timer State | Dust Detection Input; Simulation Tick; Previous Remaining Boost Ticks | Updated Remaining Boost Ticks |
 
-Sensor acquisition itself is an external interface in the Context Diagram and DFD, not an internal process; detailed sensor hardware control is outside scope.
+### Central Transformation
 
-### Central Transformation (Process)
-
-| Process ID | Process Name | Input | Output |
-|---|---|---|---|
-| 1.2.1 | Select Movement Sequence | Obstacle Response Condition | Selected Movement Sequence |
-| 2.1 | Determine Obstacle Cleaning Action | Obstacle Detection Input | Obstacle-Related Cleaning Action |
-| 2.2 | Determine Dust Power Adjustment | Dust Detection Input | Dust Power Adjustment |
-
-These processes interpret the detected conditions and determine the movement or cleaning response. The movement selection behavior follows the DFD Level 4 FSM.
+| Process | Input | Output |
+|---|---|---|
+| 1.2.1 Select Movement Sequence | Obstacle Response Condition | Selected Movement Sequence |
+| 2.1 Determine Obstacle Cleaning Action | Obstacle Detection Input | Obstacle-Related Cleaning Action |
+| 2.2.2 Determine Active Power Mode | Updated Remaining Boost Ticks; Cleaning Active Indicator | Effective Dust Power State |
 
 ### Efferent Flow (Output)
 
-| Process ID | Process Name | Input | Output |
-|---|---|---|---|
-| 1.2.2 | Produce Movement Command | Selected Movement Sequence | Movement Command |
-| 2.3 | Generate Cleaning Control Command | Obstacle-Related Cleaning Action, Dust Power Adjustment | Cleaning Control Command |
+| Process | Input | Output |
+|---|---|---|
+| 1.2.2 Produce Movement Command | Selected Movement Sequence | Movement Command |
+| 2.3 Generate Cleaning Control Command | Obstacle-Related Cleaning Action; Effective Dust Power State | Cleaning Control Command |
 
 ## 3. Transform Boundaries
 
-- **Afferent-to-Central Boundary:** `Obstacle Response Condition` from Process 1.1 to Process 1.2.1. `Obstacle Detection Input` and `Dust Detection Input` also enter Processes 2.1 and 2.2 directly from the Sensors external entity, as shown in DFD Level 2.
-- **Central-to-Efferent Boundary:** `Selected Movement Sequence` from Process 1.2.1 to Process 1.2.2; `Obstacle-Related Cleaning Action` and `Dust Power Adjustment` from Processes 2.1 and 2.2 to Process 2.3.
-- **Boundary Data Flows:** Obstacle Detection Input, Dust Detection Input, Obstacle Response Condition, Selected Movement Sequence, Obstacle-Related Cleaning Action, and Dust Power Adjustment.
-- **Boundary Control Flows:** None are specified in the SA DFDs.
-
-The two external output flows, `Movement Command` and `Cleaning Control Command`, leave the Efferent region for Drive and Cleaning Hardware. Their low-level hardware implementation is excluded by the preliminary requirements.
+- Afferent-to-central: sensor inputs and the internal Simulation Tick enter the controller. The Simulation Tick is temporal control information, not a new external hardware flow.
+- Central transformations classify/select movement, maintain the boost interval, and derive effective power from cleaning activity and remaining time.
+- Central-to-efferent: selected movement sequence and combined cleaning action/power mode become abstract commands.
+- D1 stores the transient remaining tick count inside the controller.
 
 ## 4. Transform Analysis Diagram
 
 ```mermaid
 flowchart LR
     Sensors["Sensors"]
+    Clock(("Internal Simulation Tick"))
+    D1[("D1: Dust Boost Timer State")]
 
-    subgraph A["Afferent Flow (Input)"]
-        P11["1.1 Classify Obstacle Condition"]
+    subgraph A["Afferent Flow"]
+        P11(("1.1 Classify Obstacle Condition"))
+        P221(("2.2.1 Update Dust Boost Timer State"))
     end
-
     subgraph C["Central Transformation"]
-        P121["1.2.1 Select Movement Sequence"]
-        P21["2.1 Determine Obstacle Cleaning Action"]
-        P22["2.2 Determine Dust Power Adjustment"]
+        P121(("1.2.1 Select Movement Sequence"))
+        P21(("2.1 Determine Obstacle Cleaning Action"))
+        P222(("2.2.2 Determine Active Power Mode"))
     end
-
-    subgraph E["Efferent Flow (Output)"]
-        P122["1.2.2 Produce Movement Command"]
-        P23["2.3 Generate Cleaning Control Command"]
+    subgraph E["Efferent Flow"]
+        P122(("1.2.2 Produce Movement Command"))
+        P23(("2.3 Generate Cleaning Control Command"))
     end
-
     Hardware["Drive and Cleaning Hardware"]
 
     Sensors -->|Obstacle Detection Input| P11
-    P11 -->|Obstacle Response Condition| P121
     Sensors -->|Obstacle Detection Input| P21
-    Sensors -->|Dust Detection Input| P22
+    Sensors -->|Dust Detection Input| P221
+    Clock -.->|Simulation Tick| P221
+    D1 -->|Previous Remaining Boost Ticks| P221
+    P221 -->|Updated Remaining Boost Ticks| D1
+    P11 -->|Obstacle Response Condition| P121
     P121 -->|Selected Movement Sequence| P122
-    P21 -->|Obstacle-Related Cleaning Action| P23
-    P22 -->|Dust Power Adjustment| P23
     P122 -->|Movement Command| Hardware
+    P21 -->|Obstacle-Related Cleaning Action| P23
+    P221 -->|Updated Remaining Boost Ticks| P222
+    P21 -->|Cleaning Active Indicator| P222
+    P222 -->|Effective Dust Power State| P23
     P23 -->|Cleaning Control Command| Hardware
 ```
 
 ## 5. Analysis Rules
 
-- The regions use the process names and identifiers from DFD Levels 2–3.
-- DFD data flows are shown here as analysis flows; they do not define module calls.
-- No separate control flow or hardware-control process is added.
-- Dust/obstacle priority and the all-directions-blocked cleaning state remain unresolved SA requirements and are not resolved by this analysis.
-
+- Process IDs and data flows follow SA DFD Levels 2–3.
+- D1 is transient controller state; numeric actuator power remains unspecified.
+- Main must advance the timer on every simulation tick, even when no new movement sequence is selected.
+- Module calls are defined separately in `structure_chart.md`.

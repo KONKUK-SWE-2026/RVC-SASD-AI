@@ -2,21 +2,21 @@
 
 | SD Module | C Implementation | SA Trace | Notes |
 |---|---|---|---|
-| Main | Not included in the portable controller library | Structure Chart root | The project has no defined sensor acquisition, actuator adapter, start event, or sampling loop. The preliminary requirements exclude detailed hardware controls. A platform `main()` must call `rvc_controller_step` with sensor snapshots and deliver its abstract output. |
-| Controller | `rvc_controller_init`, `rvc_controller_step` in `src/rvc_controller.c` | Process 0; DFD Level 4 FSM | Coordinates movement and cleaning outputs for each supplied sensor snapshot. |
-| Determine Movement Response | `determine_movement_response` | Process 1 | Coordinates obstacle classification, sequence selection, and command production. |
-| Classify Obstacle Condition | `classify_obstacle_condition` | Process 1.1 | Distinguishes clear, partial obstacle, and all-three-directions-blocked conditions. |
-| Select Movement Sequence | `select_movement_sequence` | Process 1.2.1 | Maps the condition to an abstract movement sequence. `TURN_ASIDE` leaves left/right selection unspecified. |
+| Main | No platform `main()` is included | Structure Chart root | Host must call the tick API once for every simulation/control tick and request a movement decision when a prior sequence is consumed. |
+| Controller | `rvc_controller_init`, `rvc_controller_step`, `rvc_controller_advance_tick` | Process 0; Movement FSM; Dust Boost Interval FSM | Owns obstacle state and the in-memory boost countdown. `advance_tick` advances it once per simulation tick and gates effective Boost by the caller's current `cleaning_active` state. |
+| Determine Movement Response | `determine_movement_response` | Process 1 | Coordinates classification, sequence selection, and command production. |
+| Classify Obstacle Condition | `classify_obstacle_condition` | Process 1.1 | Distinguishes clear, partial, and all-three-directions-blocked. |
+| Select Movement Sequence | `select_movement_sequence` | Process 1.2.1 | Maps obstacle condition to an abstract sequence; turn side remains unspecified. |
 | Produce Movement Command | `produce_movement_command` | Process 1.2.2 | Copies the selected sequence into the output command. |
-| Control Cleaning Behavior | `control_cleaning_behavior` | Process 2 | Combines obstacle-related cleaning action with the independent dust power request. |
-| Determine Obstacle Cleaning Action | `determine_obstacle_cleaning_action` | Process 2.1 | Returns clean-and-mop, stop-then-clean-and-mop, or stop-then-unspecified. |
-| Determine Dust Power Adjustment | `determine_dust_power_adjustment` | Process 2.2 | Requests a temporary boost when dust is detected; no duration is defined. |
-| Generate Cleaning Control Command | Implemented in `control_cleaning_behavior` | Process 2.3 | Produces the abstract cleaning action and boost request fields. |
+| Control Cleaning Behavior | `control_cleaning_behavior` | Process 2 | Selects obstacle-related cleaning action; power state is reported alongside it. |
+| Determine Obstacle Cleaning Action | `determine_obstacle_cleaning_action` | Process 2.1 | Returns the required abstract stop/resume action. |
+| Update Dust Boost Timer State | `update_dust_boost_timer`, called by `rvc_controller_advance_tick` | Process 2.2.1; D1 | Dust-positive tick sets five; dust-negative tick decrements once; initialization resets to zero. |
+| Determine Active Power Mode | `determine_active_power_mode` | Process 2.2.2; Dust Boost Interval FSM | Returns Boost iff cleaning is active and remaining ticks >0, else Normal. |
+| Generate Cleaning Control Command | Cleaning action and power-mode output assembly in `rvc_controller_step`; power-mode state returned by `rvc_controller_advance_tick` | Process 2.3 | Movement decisions report cleaning action with the current Normal/Boost mode. Each simulation-tick call returns updated mode and remaining duration; numeric actuator level remains abstract. |
 
-## Design Deviations and Limits
+## Design Limits
 
-- The C implementation is a portable controller library. It does not provide a hardware-bound `main()` loop because the approved artifacts define neither hardware APIs nor sensor polling/start timing, and hardware-control detail is out of scope.
-- The abstract `RVC_MOVE_TURN_ASIDE` command preserves the requirement to turn left or right without inventing a side-selection policy.
-- The all-directions-blocked output marks the final cleaning state as unspecified, consistent with the Process Specifications.
-- A dust boost request is a boolean output; boost duration and level remain unspecified.
-- No hardware drivers or external libraries are added to production code.
+- Hardware-bound `main()`, sensor acquisition, actuator APIs, and physical tick cadence are not specified and remain outside this controller library.
+- The integration contract requires one `rvc_controller_advance_tick` call per logical simulation tick, even while movement sequence actions continue, and an accurate `cleaning_active` value for the current action.
+- The movement command remains abstract `TURN_ASIDE`; the simulator selects a side only as an adapter convention.
+- Numeric boost magnitude remains unspecified.

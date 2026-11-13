@@ -20,8 +20,8 @@ MOVEMENT_NAMES = ["FORWARD", "TURN_ASIDE", "BACKWARD"]
 CLEANING_NAMES = [
     "CLEANING_AND_MOP",
     "CLEANING_STOP_THEN_CLEAN_AND_MOP",
-    "CLEANING_STOP_THEN_UNSPECIFIED",
 ]
+POWER_MODE_NAMES = ["NORMAL", "BOOST"]
 HEADINGS = ("N", "E", "S", "W")
 VECTORS = {"N": (0, -1), "E": (1, 0), "S": (0, 1), "W": (-1, 0)}
 
@@ -36,7 +36,7 @@ class CSensorInput(ctypes.Structure):
 
 
 class CController(ctypes.Structure):
-    _fields_ = [("state", ctypes.c_int)]
+    _fields_ = [("state", ctypes.c_int), ("boost_ticks_remaining", ctypes.c_uint)]
 
 
 class CControllerOutput(ctypes.Structure):
@@ -44,8 +44,13 @@ class CControllerOutput(ctypes.Structure):
         ("movement", ctypes.c_int * 3),
         ("movement_count", ctypes.c_size_t),
         ("cleaning_action", ctypes.c_int),
-        ("request_temporary_power_boost", ctypes.c_bool),
+        ("cleaning_power_mode", ctypes.c_int),
+        ("boost_ticks_remaining", ctypes.c_uint),
     ]
+
+
+class CCleaningPowerState(ctypes.Structure):
+    _fields_ = [("mode", ctypes.c_int), ("remaining_ticks", ctypes.c_uint)]
 
 
 def load_c_library() -> ctypes.CDLL:
@@ -73,6 +78,11 @@ def load_c_library() -> ctypes.CDLL:
         ctypes.POINTER(CControllerOutput),
     ]
     c_library.rvc_controller_step.restype = ctypes.c_bool
+    c_library.rvc_controller_advance_tick.argtypes = [
+        ctypes.POINTER(CController), ctypes.c_bool, ctypes.c_bool,
+        ctypes.POINTER(CCleaningPowerState)
+    ]
+    c_library.rvc_controller_advance_tick.restype = ctypes.c_bool
     return c_library
 
 
@@ -144,6 +154,7 @@ class Simulator:
         self.last_output: dict | None = None
         self.last_sensor_sample: dict | None = None
         self.last_obstacle_condition = "Not sampled"
+        self.last_power_mode = "NORMAL"
         self.previous_state = "Forward"
         self.c_controller = CController()
         self.c_library.rvc_controller_init(ctypes.byref(self.c_controller))
@@ -199,10 +210,13 @@ class Simulator:
             "controller_state": self._state_name(),
             "sensors": self._sensors(),
             "controller_invoked": False,
+            "movement_decision_invoked": False,
+            "timer_update_invoked": False,
             "controller_output": self.last_output,
             "motor_output": None,
             "cleaner_output": None,
-            "power_timer": "TBD (not represented by C controller)",
+            "power_mode": "NORMAL",
+            "power_timer": int(self.c_controller.boost_ticks_remaining),
             "turn_timer": "TBD (not represented by C controller)",
             "sequence_remaining": list(self.queue),
             "last_obstacle_condition": self.last_obstacle_condition,
@@ -241,7 +255,8 @@ class Simulator:
         self.last_output = {
             "movement_sequence": movement,
             "cleaning_action": CLEANING_NAMES[c_output.cleaning_action],
-            "request_temporary_power_boost": bool(c_output.request_temporary_power_boost),
+            "cleaning_power_mode": POWER_MODE_NAMES[c_output.cleaning_power_mode],
+            "boost_ticks_remaining": int(c_output.boost_ticks_remaining),
         }
         self.last_sensor_sample = dict(sensors)
         self.queue = list(c_output.movement[: c_output.movement_count])
@@ -254,6 +269,19 @@ class Simulator:
             self.last_obstacle_condition = "Obstacle detected, not all three directions"
         return self.last_output
 
+    def _c_advance_tick(self, dust_detected: bool, cleaning_active: bool) -> dict:
+        power_state = CCleaningPowerState()
+        ok = self.c_library.rvc_controller_advance_tick(
+            ctypes.byref(self.c_controller), dust_detected, cleaning_active,
+            ctypes.byref(power_state)
+        )
+        if not ok:
+            raise RuntimeError("C controller rejected simulator tick")
+        return {
+            "cleaning_power_mode": POWER_MODE_NAMES[power_state.mode],
+            "boost_ticks_remaining": int(power_state.remaining_ticks),
+        }
+
     def _cleaner_action_for_sequence_step(self, action: int, index: int, length: int) -> str:
         if self.last_output is None:
             return "Not issued"
@@ -262,8 +290,6 @@ class Simulator:
             return "Clean and mop"
         if cleaning == "CLEANING_STOP_THEN_CLEAN_AND_MOP":
             return "Clean and mop" if index == length - 1 else "Stop cleaning during obstacle handling"
-        if cleaning == "CLEANING_STOP_THEN_UNSPECIFIED":
-            return "Unspecified final cleaning state" if index == length - 1 else "Stop cleaning during obstacle handling"
         return "Unknown"
 
     def _move(self, action: int) -> tuple[list[int], str]:
@@ -302,13 +328,19 @@ class Simulator:
         sensors = self._sensors()
         invoked = not self.queue
         old_state = self._state_name()
+        old_power_mode = self.last_power_mode
         if invoked:
             self._c_step(sensors)
         action_index = self.sequence_cursor
         action = self.queue.pop(0) if self.queue else 0
         sequence_length = len(self.last_output["movement_sequence"]) if self.last_output else 0
         cleaner_output = self._cleaner_action_for_sequence_step(action, action_index, sequence_length)
-        boost_request = self.last_output["request_temporary_power_boost"] if invoked and self.last_output else None
+        power_state = self._c_advance_tick(
+            sensors["dust_detected"], cleaner_output == "Clean and mop"
+        )
+        self.last_power_mode = power_state["cleaning_power_mode"]
+        if self.last_output is not None:
+            self.last_output.update(power_state)
 
         map_changes = []
         if cleaner_output == "Clean and mop" and self.position in self.dust:
@@ -322,11 +354,8 @@ class Simulator:
         notes = []
         if not invoked:
             notes.append("Executing the remaining action from the last C movement sequence; controller state is held.")
-        if invoked and boost_request:
-            notes.append("C controller requested a temporary power boost; duration is unspecified.")
-        if cleaner_output == "Unspecified final cleaning state":
-            notes.append("SA leaves cleaning state for this all-directions-blocked phase unspecified.")
-
+        if old_power_mode != self.last_power_mode:
+            notes.append(f"Cleaning power changed: {old_power_mode} -> {self.last_power_mode}.")
         snapshot = self._base_snapshot()
         snapshot.update(
             {
@@ -335,14 +364,19 @@ class Simulator:
                 "position": new_position,
                 "direction": self.direction,
                 "controller_invoked": invoked,
+                "movement_decision_invoked": invoked,
+                "timer_update_invoked": True,
                 "controller_sampled_inputs": dict(sensors) if invoked else None,
+                "timer_sampled_dust": sensors["dust_detected"],
                 "controller_output": self.last_output,
                 "motor_output": motor_output,
                 "cleaner_output": {
                     "action": cleaner_output,
-                    "power_boost_request": boost_request,
-                    "power_boost_request_source": "fresh C output" if invoked else "no new C output",
+                    "power_mode": power_state["cleaning_power_mode"],
+                    "boost_ticks_remaining": power_state["boost_ticks_remaining"],
                 },
+                "power_mode": power_state["cleaning_power_mode"],
+                "power_timer": power_state["boost_ticks_remaining"],
                 "sequence_remaining": [MOVEMENT_NAMES[value] for value in self.queue],
                 "map_changes": map_changes,
                 "transition": f"{old_state} -> {new_state}" if invoked and old_state != new_state else None,

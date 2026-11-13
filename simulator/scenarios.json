@@ -1,22 +1,674 @@
 [
-  {"id":"ST-01","name":"Clear floor baseline","initial_position":[4,4],"direction":"N","obstacles":[],"dust":[],"max_ticks":8,"run_ticks":5,"functions":["sensor inputs report a clear path","forward movement selection","automatic clean and mop output"],"requirements":["Preliminary bullet 1","Preliminary bullet 2"],"expected":"With no adjacent obstacles or dust, the C controller selects forward movement and clean-and-mop behavior."},
-  {"id":"ST-02","name":"Dust at initial position","initial_position":[4,4],"direction":"N","obstacles":[],"dust":[[4,4]],"max_ticks":8,"run_ticks":5,"functions":["dust sensor input","forward movement selection","clean and mop with boost request"],"requirements":["Preliminary bullet 1","Preliminary bullet 2","Preliminary bullet 5"],"expected":"The controller selects forward movement and clean-and-mop behavior and requests temporary power increase when dust is detected."},
-  {"id":"ST-03","name":"Front obstacle","initial_position":[4,4],"direction":"N","obstacles":[[4,3]],"dust":[],"max_ticks":8,"run_ticks":5,"functions":["front obstacle sensing","obstacle-avoidance movement sequence","stop then resume cleaning"],"requirements":["Preliminary bullet 1","Preliminary bullet 3"],"expected":"The controller selects turn-aside followed by forward movement and reports stop-then-clean-and-mop behavior."},
-  {"id":"ST-04","name":"Left obstacle","initial_position":[4,4],"direction":"N","obstacles":[[3,4]],"dust":[],"max_ticks":8,"run_ticks":5,"functions":["left obstacle sensing","obstacle-avoidance movement sequence","cleaning response"],"requirements":["Preliminary bullet 1","Preliminary bullet 3"],"expected":"Any detected obstacle selects the general avoidance sequence; the C output leaves the turn side abstract."},
-  {"id":"ST-05","name":"Right obstacle","initial_position":[4,4],"direction":"N","obstacles":[[5,4]],"dust":[],"max_ticks":8,"run_ticks":5,"functions":["right obstacle sensing","obstacle-avoidance movement sequence","cleaning response"],"requirements":["Preliminary bullet 1","Preliminary bullet 3"],"expected":"Any detected obstacle selects the general avoidance sequence and stop-then-clean-and-mop output."},
-  {"id":"ST-06","name":"Front and left obstacles","initial_position":[4,4],"direction":"N","obstacles":[[4,3],[3,4]],"dust":[],"max_ticks":8,"run_ticks":5,"functions":["multi-direction obstacle sensing","partial-obstacle classification","avoidance and cleaner outputs"],"requirements":["Preliminary bullet 1","Preliminary bullet 3"],"expected":"Because fewer than all three sensed directions are blocked, the general turn-aside and forward sequence is selected."},
-  {"id":"ST-07","name":"Front and right obstacles","initial_position":[4,4],"direction":"N","obstacles":[[4,3],[5,4]],"dust":[],"max_ticks":8,"run_ticks":5,"functions":["multi-direction obstacle sensing","partial-obstacle classification","avoidance and cleaner outputs"],"requirements":["Preliminary bullet 1","Preliminary bullet 3"],"expected":"The partial-obstacle response is selected; the map lets the evaluator inspect the simulator's turn-side convention."},
-  {"id":"ST-08","name":"Both sides blocked, front clear","initial_position":[4,4],"direction":"N","obstacles":[[3,4],[5,4]],"dust":[],"max_ticks":8,"run_ticks":5,"functions":["left/right obstacle sensing","not-all-directions classification","forward and cleaning output"],"requirements":["Preliminary bullet 1","Preliminary bullet 2","Preliminary bullet 3"],"expected":"The all-three-directions condition is false, so the controller selects the general obstacle response."},
-  {"id":"ST-09","name":"Front and both sides blocked","initial_position":[4,4],"direction":"N","obstacles":[[4,3],[3,4],[5,4]],"dust":[],"max_ticks":8,"run_ticks":6,"functions":["three-direction obstacle sensing","all-blocked classification","backward recovery sequence"],"requirements":["Preliminary bullet 3","Preliminary bullet 4"],"expected":"The controller selects backward, turn-aside, then forward and reports the final cleaning state as unspecified."},
-  {"id":"ST-10","name":"Front obstacle with dust","initial_position":[4,4],"direction":"N","obstacles":[[4,3]],"dust":[[4,4]],"max_ticks":8,"run_ticks":6,"functions":["obstacle and dust sensing","avoidance sequence","independent cleaning and boost outputs"],"requirements":["Preliminary bullet 3","Preliminary bullet 5"],"expected":"The movement response is obstacle avoidance and the C output independently requests a dust power boost; priority is not defined."},
-  {"id":"ST-11","name":"Left obstacle with dust","initial_position":[4,4],"direction":"N","obstacles":[[3,4]],"dust":[[4,4]],"max_ticks":8,"run_ticks":6,"functions":["left obstacle and dust sensing","movement response","cleaner boost request"],"requirements":["Preliminary bullet 3","Preliminary bullet 5"],"expected":"The C controller selects partial-obstacle movement and requests temporary power increase for the detected dust."},
-  {"id":"ST-12","name":"Right obstacle with dust","initial_position":[4,4],"direction":"N","obstacles":[[5,4]],"dust":[[4,4]],"max_ticks":8,"run_ticks":6,"functions":["right obstacle and dust sensing","movement response","cleaner boost request"],"requirements":["Preliminary bullet 3","Preliminary bullet 5"],"expected":"The C controller selects partial-obstacle movement and requests temporary power increase for the detected dust."},
-  {"id":"ST-13","name":"All directions blocked with dust","initial_position":[4,4],"direction":"N","obstacles":[[4,3],[3,4],[5,4]],"dust":[[4,4]],"max_ticks":8,"run_ticks":6,"functions":["all-direction obstacle sensing","backward recovery","dust boost request"],"requirements":["Preliminary bullet 4","Preliminary bullet 5"],"expected":"The controller selects backward recovery and reports the boost request; cleaning behavior in this combined case requires human evaluation."},
-  {"id":"ST-14","name":"East-facing front obstacle","initial_position":[4,4],"direction":"E","obstacles":[[5,4]],"dust":[],"max_ticks":8,"run_ticks":5,"functions":["direction-relative front sensing","obstacle response","cleaner response"],"requirements":["Preliminary bullet 2","Preliminary bullet 3"],"expected":"The obstacle directly east is reported as front relative to heading; partial-obstacle movement is selected."},
-  {"id":"ST-15","name":"South-facing front obstacle","initial_position":[4,4],"direction":"S","obstacles":[[4,5]],"dust":[],"max_ticks":8,"run_ticks":5,"functions":["direction-relative front sensing","obstacle response","cleaner response"],"requirements":["Preliminary bullet 2","Preliminary bullet 3"],"expected":"The obstacle directly south is reported as front relative to heading; partial-obstacle movement is selected."},
-  {"id":"ST-16","name":"West-facing front obstacle","initial_position":[4,4],"direction":"W","obstacles":[[3,4]],"dust":[],"max_ticks":8,"run_ticks":5,"functions":["direction-relative front sensing","obstacle response","cleaner response"],"requirements":["Preliminary bullet 2","Preliminary bullet 3"],"expected":"The obstacle directly west is reported as front relative to heading; partial-obstacle movement is selected."},
-  {"id":"ST-17","name":"East-facing all directions blocked","initial_position":[4,4],"direction":"E","obstacles":[[5,4],[4,3],[4,5]],"dust":[],"max_ticks":8,"run_ticks":6,"functions":["rotated three-direction sensing","all-blocked classification","backward recovery"],"requirements":["Preliminary bullet 4","Preliminary bullet 1"],"expected":"Front, left, and right relative to east are all blocked; backward recovery is selected."},
-  {"id":"ST-18","name":"South-facing obstacle with dust","initial_position":[4,4],"direction":"S","obstacles":[[4,5],[5,4]],"dust":[[4,4]],"max_ticks":8,"run_ticks":6,"functions":["direction-relative sensing","partial-obstacle classification","dust boost request"],"requirements":["Preliminary bullet 3","Preliminary bullet 5"],"expected":"The side obstacle keeps this out of the all-blocked case; dust detection requests temporary power increase."},
-  {"id":"ST-19","name":"Dust with two side obstacles","initial_position":[4,4],"direction":"W","obstacles":[[4,3],[4,5]],"dust":[[4,4]],"max_ticks":8,"run_ticks":6,"functions":["direction-relative side sensing","movement response","cleaning and boost request"],"requirements":["Preliminary bullet 1","Preliminary bullet 3","Preliminary bullet 5"],"expected":"The two side obstacles do not meet the all-three condition; the controller selects general avoidance and requests a dust boost."},
-  {"id":"ST-20","name":"Dust encountered after forward movement","initial_position":[4,4],"direction":"N","obstacles":[[4,7]],"dust":[[4,3]],"max_ticks":8,"run_ticks":6,"functions":["repeated sensor sampling","forward movement","dust-triggered boost"],"requirements":["Preliminary bullet 1","Preliminary bullet 2","Preliminary bullet 5"],"expected":"After moving forward onto the dust cell, a subsequent C-controller decision should report dust and request temporary power increase."}
+  {
+    "id": "ST-01",
+    "name": "Clear floor baseline",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "N",
+    "obstacles": [],
+    "dust": [],
+    "max_ticks": 8,
+    "run_ticks": 5,
+    "functions": [
+      "sensor inputs report a clear path",
+      "forward movement selection",
+      "automatic clean and mop output"
+    ],
+    "requirements": [
+      "RVC-01",
+      "RVC-02"
+    ],
+    "expected": "With no adjacent obstacles or dust, the C controller selects forward movement and clean-and-mop behavior."
+  },
+  {
+    "id": "ST-02",
+    "name": "Dust at initial position",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "N",
+    "obstacles": [],
+    "dust": [
+      [
+        4,
+        4
+      ]
+    ],
+    "max_ticks": 8,
+    "run_ticks": 5,
+    "functions": [
+      "dust sensor input",
+      "five-tick boost state",
+      "forward movement and clean/mop output"
+    ],
+    "requirements": [
+      "RVC-01",
+      "RVC-02",
+      "RVC-05"
+    ],
+    "expected": "Dust is detected on the first tick; Boost remains active for the five active ticks, with remaining ticks visible in the C state."
+  },
+  {
+    "id": "ST-03",
+    "name": "Front obstacle",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "N",
+    "obstacles": [
+      [
+        4,
+        3
+      ]
+    ],
+    "dust": [],
+    "max_ticks": 8,
+    "run_ticks": 5,
+    "functions": [
+      "front obstacle sensing",
+      "obstacle-avoidance movement sequence",
+      "stop then resume cleaning"
+    ],
+    "requirements": [
+      "RVC-01",
+      "RVC-03"
+    ],
+    "expected": "The controller selects turn-aside followed by forward movement and reports stop-then-clean-and-mop behavior."
+  },
+  {
+    "id": "ST-04",
+    "name": "Left obstacle",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "N",
+    "obstacles": [
+      [
+        3,
+        4
+      ]
+    ],
+    "dust": [],
+    "max_ticks": 8,
+    "run_ticks": 5,
+    "functions": [
+      "left obstacle sensing",
+      "obstacle-avoidance movement sequence",
+      "cleaning response"
+    ],
+    "requirements": [
+      "RVC-01",
+      "RVC-03"
+    ],
+    "expected": "Any detected obstacle selects the general avoidance sequence; the C output leaves the turn side abstract."
+  },
+  {
+    "id": "ST-05",
+    "name": "Right obstacle",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "N",
+    "obstacles": [
+      [
+        5,
+        4
+      ]
+    ],
+    "dust": [],
+    "max_ticks": 8,
+    "run_ticks": 5,
+    "functions": [
+      "right obstacle sensing",
+      "obstacle-avoidance movement sequence",
+      "cleaning response"
+    ],
+    "requirements": [
+      "RVC-01",
+      "RVC-03"
+    ],
+    "expected": "Any detected obstacle selects the general avoidance sequence and stop-then-clean-and-mop output."
+  },
+  {
+    "id": "ST-06",
+    "name": "Front and left obstacles",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "N",
+    "obstacles": [
+      [
+        4,
+        3
+      ],
+      [
+        3,
+        4
+      ]
+    ],
+    "dust": [],
+    "max_ticks": 8,
+    "run_ticks": 5,
+    "functions": [
+      "multi-direction obstacle sensing",
+      "partial-obstacle classification",
+      "avoidance and cleaner outputs"
+    ],
+    "requirements": [
+      "RVC-01",
+      "RVC-03"
+    ],
+    "expected": "Because fewer than all three sensed directions are blocked, the general turn-aside and forward sequence is selected."
+  },
+  {
+    "id": "ST-07",
+    "name": "Front and right obstacles",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "N",
+    "obstacles": [
+      [
+        4,
+        3
+      ],
+      [
+        5,
+        4
+      ]
+    ],
+    "dust": [],
+    "max_ticks": 8,
+    "run_ticks": 5,
+    "functions": [
+      "multi-direction obstacle sensing",
+      "partial-obstacle classification",
+      "avoidance and cleaner outputs"
+    ],
+    "requirements": [
+      "RVC-01",
+      "RVC-03"
+    ],
+    "expected": "The partial-obstacle response is selected; the map lets the evaluator inspect the simulator's turn-side convention."
+  },
+  {
+    "id": "ST-08",
+    "name": "Both sides blocked, front clear",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "N",
+    "obstacles": [
+      [
+        3,
+        4
+      ],
+      [
+        5,
+        4
+      ]
+    ],
+    "dust": [],
+    "max_ticks": 8,
+    "run_ticks": 5,
+    "functions": [
+      "left/right obstacle sensing",
+      "not-all-directions classification",
+      "forward and cleaning output"
+    ],
+    "requirements": [
+      "RVC-01",
+      "RVC-02",
+      "RVC-03"
+    ],
+    "expected": "The all-three-directions condition is false, so the controller selects the general obstacle response."
+  },
+  {
+    "id": "ST-09",
+    "name": "Front and both sides blocked",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "N",
+    "obstacles": [
+      [
+        4,
+        3
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        5,
+        4
+      ]
+    ],
+    "dust": [],
+    "max_ticks": 8,
+    "run_ticks": 6,
+    "functions": [
+      "three-direction obstacle sensing",
+      "all-blocked classification",
+      "backward recovery sequence"
+    ],
+    "requirements": [
+      "RVC-03",
+      "RVC-04"
+    ],
+    "expected": "The controller selects backward, turn-aside, then forward; cleaning is stopped during backward/turn and resumes during forward."
+  },
+  {
+    "id": "ST-10",
+    "name": "Front obstacle with dust",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "N",
+    "obstacles": [
+      [
+        4,
+        3
+      ]
+    ],
+    "dust": [
+      [
+        4,
+        4
+      ]
+    ],
+    "max_ticks": 8,
+    "run_ticks": 6,
+    "functions": [
+      "obstacle and dust sensing",
+      "obstacle response",
+      "effective boost only while cleaning"
+    ],
+    "requirements": [
+      "RVC-03",
+      "RVC-05"
+    ],
+    "expected": "Cleaning power is NORMAL during the turn while cleaning is stopped, then uses the remaining Boost interval when forward cleaning resumes. The timer advances on each movement-sequence tick."
+  },
+  {
+    "id": "ST-11",
+    "name": "Left obstacle with dust",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "N",
+    "obstacles": [
+      [
+        3,
+        4
+      ]
+    ],
+    "dust": [
+      [
+        4,
+        4
+      ]
+    ],
+    "max_ticks": 8,
+    "run_ticks": 6,
+    "functions": [
+      "left obstacle and dust sensing",
+      "movement response",
+      "boost state and countdown"
+    ],
+    "requirements": [
+      "RVC-03",
+      "RVC-05"
+    ],
+    "expected": "The C controller selects obstacle response; cleaning power is NORMAL during the turn and becomes BOOST when forward cleaning resumes if the interval remains active."
+  },
+  {
+    "id": "ST-12",
+    "name": "Right obstacle with dust",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "N",
+    "obstacles": [
+      [
+        5,
+        4
+      ]
+    ],
+    "dust": [
+      [
+        4,
+        4
+      ]
+    ],
+    "max_ticks": 8,
+    "run_ticks": 6,
+    "functions": [
+      "right obstacle and dust sensing",
+      "movement response",
+      "boost state and countdown"
+    ],
+    "requirements": [
+      "RVC-03",
+      "RVC-05"
+    ],
+    "expected": "The C controller selects obstacle response; cleaning power is NORMAL during the turn and becomes BOOST when forward cleaning resumes if the interval remains active."
+  },
+  {
+    "id": "ST-13",
+    "name": "All directions blocked with dust",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "N",
+    "obstacles": [
+      [
+        4,
+        3
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        5,
+        4
+      ]
+    ],
+    "dust": [
+      [
+        4,
+        4
+      ]
+    ],
+    "max_ticks": 8,
+    "run_ticks": 6,
+    "functions": [
+      "all-direction obstacle sensing",
+      "backward recovery",
+      "cleaning stop and resume",
+      "effective boost power only while cleaning"
+    ],
+    "requirements": [
+      "RVC-04",
+      "RVC-05"
+    ],
+    "expected": "The timer starts on the dust tick and advances on every tick. Effective power is NORMAL during backward and turn-aside while cleaning is stopped, then BOOST during forward cleaning while the interval remains active."
+  },
+  {
+    "id": "ST-14",
+    "name": "East-facing front obstacle",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "E",
+    "obstacles": [
+      [
+        5,
+        4
+      ]
+    ],
+    "dust": [],
+    "max_ticks": 8,
+    "run_ticks": 5,
+    "functions": [
+      "direction-relative front sensing",
+      "obstacle response",
+      "cleaner response"
+    ],
+    "requirements": [
+      "RVC-02",
+      "RVC-03"
+    ],
+    "expected": "The obstacle directly east is reported as front relative to heading; partial-obstacle movement is selected."
+  },
+  {
+    "id": "ST-15",
+    "name": "South-facing front obstacle",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "S",
+    "obstacles": [
+      [
+        4,
+        5
+      ]
+    ],
+    "dust": [],
+    "max_ticks": 8,
+    "run_ticks": 5,
+    "functions": [
+      "direction-relative front sensing",
+      "obstacle response",
+      "cleaner response"
+    ],
+    "requirements": [
+      "RVC-02",
+      "RVC-03"
+    ],
+    "expected": "The obstacle directly south is reported as front relative to heading; partial-obstacle movement is selected."
+  },
+  {
+    "id": "ST-16",
+    "name": "West-facing front obstacle",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "W",
+    "obstacles": [
+      [
+        3,
+        4
+      ]
+    ],
+    "dust": [],
+    "max_ticks": 8,
+    "run_ticks": 5,
+    "functions": [
+      "direction-relative front sensing",
+      "obstacle response",
+      "cleaner response"
+    ],
+    "requirements": [
+      "RVC-02",
+      "RVC-03"
+    ],
+    "expected": "The obstacle directly west is reported as front relative to heading; partial-obstacle movement is selected."
+  },
+  {
+    "id": "ST-17",
+    "name": "East-facing all directions blocked",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "E",
+    "obstacles": [
+      [
+        5,
+        4
+      ],
+      [
+        4,
+        3
+      ],
+      [
+        4,
+        5
+      ]
+    ],
+    "dust": [],
+    "max_ticks": 8,
+    "run_ticks": 6,
+    "functions": [
+      "rotated three-direction sensing",
+      "all-blocked classification",
+      "backward recovery"
+    ],
+    "requirements": [
+      "RVC-04",
+      "RVC-01"
+    ],
+    "expected": "Front, left, and right relative to east are all blocked; backward recovery is selected."
+  },
+  {
+    "id": "ST-18",
+    "name": "South-facing obstacle with dust",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "S",
+    "obstacles": [
+      [
+        4,
+        5
+      ],
+      [
+        5,
+        4
+      ]
+    ],
+    "dust": [
+      [
+        4,
+        4
+      ]
+    ],
+    "max_ticks": 8,
+    "run_ticks": 6,
+    "functions": [
+      "direction-relative sensing",
+      "partial-obstacle response",
+      "dust power mode duration"
+    ],
+    "requirements": [
+      "RVC-03",
+      "RVC-05"
+    ],
+    "expected": "The C controller advances the timer on every tick; the output remains NORMAL during stopped-cleaning actions and is BOOST only on active cleaning ticks."
+  },
+  {
+    "id": "ST-19",
+    "name": "Dust with two side obstacles",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "W",
+    "obstacles": [
+      [
+        4,
+        3
+      ],
+      [
+        4,
+        5
+      ]
+    ],
+    "dust": [
+      [
+        4,
+        4
+      ]
+    ],
+    "max_ticks": 8,
+    "run_ticks": 6,
+    "functions": [
+      "direction-relative side sensing",
+      "movement response",
+      "boost power mode"
+    ],
+    "requirements": [
+      "RVC-01",
+      "RVC-03",
+      "RVC-05"
+    ],
+    "expected": "The partial obstacle turn reports NORMAL while cleaning is stopped; forward cleaning reports BOOST if the dust interval remains active."
+  },
+  {
+    "id": "ST-20",
+    "name": "Dust encountered after forward movement",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "N",
+    "obstacles": [
+      [
+        4,
+        7
+      ]
+    ],
+    "dust": [
+      [
+        4,
+        3
+      ]
+    ],
+    "max_ticks": 8,
+    "run_ticks": 6,
+    "functions": [
+      "repeated sensor sampling",
+      "forward movement",
+      "dust-triggered boost state"
+    ],
+    "requirements": [
+      "RVC-01",
+      "RVC-02",
+      "RVC-05"
+    ],
+    "expected": "When the robot reaches the dust cell while cleaning, a subsequent tick reports dust, starts the five-tick interval, and outputs Boost. The timer advances on every later simulation tick."
+  },
+  {
+    "id": "ST-21",
+    "name": "Boost refresh and normal-power recovery",
+    "initial_position": [
+      4,
+      4
+    ],
+    "direction": "N",
+    "obstacles": [],
+    "dust": [
+      [
+        4,
+        4
+      ],
+      [
+        4,
+        3
+      ]
+    ],
+    "max_ticks": 8,
+    "run_ticks": 8,
+    "functions": [
+      "dust detection on consecutive controller decisions",
+      "five-tick boost refresh",
+      "normal-power transition after expiry"
+    ],
+    "requirements": [
+      "RVC-01",
+      "RVC-02",
+      "RVC-05"
+    ],
+    "expected": "Dust is detected at the start and again on the next cell while Boost is active; the C timer refreshes to five. After dust is cleared and five active ticks elapse, the trace returns to Normal."
+  }
 ]
